@@ -3,23 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapa Leaflet</title>
-    <!-- Estilos de Leaflet -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <style>
-        #map {
-            height: 100vh;
-            width: 100%;
-        }
-    </style>
+    <title>Arborizadora Avanza</title>
+    <link rel="stylesheet" href="estilos.css">
+    <script src="programa.js" defer></script>
 </head>
 <body>
-    <div id="map"></div>
+    <!-- Encabezado con logo -->
+    <header>
+        <div class="logo-container">
+            <img src="img/logo.jpeg" alt="Logo Arborizadora Alta">
+            <h1>ARBORIZADORA ALTA</h1>
+        </div>
 
-    <!-- Scripts de Leaflet -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Tu script principal -->
-    <script src="programa.js"></script>
+        <!-- Barra de navegación -->
+        <nav>
+            <ul>
+                <li><a href="index.html" class="activo">Inicio</a></li>
+                <li><a href="equipamientos.html">Equipamientos</a></li>
+                <li><a href="problematicas.html">Problemáticas</a></li>
+                <li><a href="acerca.html">Acerca de</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Portada -->
+    <section class="portada">
+        <img src="img/portada.jpeg" alt="Portada Arborizadora Alta">
+        <div class="texto-portada">
+            <h2>ARBORIZADORA ALTA</h2>
+        </div>
+    </section>
+
+    <!-- Contenido -->
+    <main>
+        <h3>Bienvenidos a Arborizadora Avanza</h3>
+        <p>Un espacio para conocer y mejorar nuestra comunidad.</p>
+    </main>
+
+    <!-- Pie de página -->
+    <footer>
+        <p>&copy; 2025 Arborizadora Avanza. Todos los derechos reservados.</p>
+    </footer>
 </body>
 </html>
-
