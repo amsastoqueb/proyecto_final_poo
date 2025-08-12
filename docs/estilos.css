@@ -1,55 +1,32 @@
 body {
-    margin: 0;
     font-family: Arial, sans-serif;
-}
-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 20px;
-    background-color: #2e7d32;
-    color: white;
+    margin: 0;
+    padding: 0;
 }
 
-header img {
-    height: 50px;
+header {
+    background: #333;
+    color: white;
+    padding: 10px;
+    text-align: center;
 }
 
 nav a {
     color: white;
-    text-decoration: none;
     margin: 0 15px;
+    text-decoration: none;
 }
 
 nav a:hover {
     text-decoration: underline;
 }
 
-.hero {
-    position: relative;
-    height: 90vh;
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.hero h1 {
-    color: white;
-    font-size: 3rem;
-    background: rgba(0, 0, 0, 0.5);
-    padding: 20px;
-    border-radius: 10px;
-}
-
 main {
-    padding: 50px 20px;
+    padding: 20px;
 }
 
-footer {
-    text-align: center;
-    padding: 15px;
-    background-color: #2e7d32;
-    color: white;
+#mapa {
+    width: 100%;
+    height: 500px;
+    background: lightgray;
 }

@@ -3,29 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arborizadora Alta</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Mapa Leaflet</title>
+    <!-- Estilos de Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <style>
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+    </style>
 </head>
-<script src="js/programa.js" defer></script>
-</body>
 <body>
+    <div id="map"></div>
 
-    <header>
-        <img src="img/logo.jpeg" alt="Logo Empresa">
-        <nav>
-            <a href="equipamientos.html">Equipamientos</a>
-            <a href="problematicas.html">Problemáticas</a>
-            <a href="acercade.html">Acerca de</a>
-        </nav>
-    </header>
-
-    <div class="hero" style="background-image: url('img/portada.jpeg');">
-        <h1>ARBORIZADORA ALTA</h1>
-    </div>
-
-    <footer>
-        <p>© 2025 Arborizadora Alta</p>
-    </footer>
-
+    <!-- Scripts de Leaflet -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Tu script principal -->
+    <script src="programa.js"></script>
 </body>
 </html>
+
