@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parques - Arborizadora Avanza</title>
+    <link rel="stylesheet" href="estilos.css">
+    <script src="programa.js" defer></script>
+    <style>
+        /* Estilo para la sección dividida */
+        .contenedor-parques {
+            display: flex;
+            flex-wrap: wrap; /* Para que en pantallas pequeñas se apilen */
+            gap: 20px;
+            padding: 20px;
+        }
+        .mapa {
+            flex: 1;
+            min-width: 300px;
+            height: 400px;
+            background-color: #e0e0e0; /* Color temporal para ver el contenedor */
+        }
+        .descripcion {
+            flex: 1;
+            min-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Encabezado con logo -->
+    <header>
+        <div class="logo-container">
+            <img src="logo.jpeg" alt="Logo Arborizadora Alta">
+            <h1>ARBORIZADORA ALTA</h1>
+        </div>
+
+        <!-- Barra de navegación con el mismo menú -->
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li>
+                    <a href="#">Equipamientos</a>
+                    <ul>
+                        <li><a href="parques.html" class="activo">Parques</a></li>
+                    </ul>
+                </li>
+                <li><a href="problematicas.html">Problemáticas</a></li>
+                <li><a href="acerca.html">Acerca de</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Sección con mapa y descripción -->
+    <section class="contenedor-parques">
+        <!-- Columna izquierda: mapa -->
+        <div id="map" class="mapa">
+            <!-- Aquí se cargará el mapa con GeoJSON -->
+        </div>
+
+        <!-- Columna derecha: descripción -->
+        <div class="descripcion">
+            <h3>Parques y Zonas Verdes</h3>
+            <p>En Arborizadora Alta contamos con diversos parques que ofrecen espacios de recreación, deporte y contacto con la naturaleza.</p>
+            <ul>
+                <li>Parque Principal Arborizadora Alta</li>
+                <li>Parque La Esperanza</li>
+                <li>Parque Infantil Los Pinos</li>
+            </ul>
+            <p>Te invitamos a cuidarlos y disfrutarlos en familia.</p>
+        </div>
+    </section>
+
+    <!-- Pie de página -->
+    <footer>
+        <p>&copy; 2025 Arborizadora Avanza. Todos los derechos reservados.</p>
+    </footer>
+
+    <!-- Librería Leaflet para el mapa -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script>
+        // Inicializar mapa Leaflet
+        var map = L.map('map').setView([4.6097, -74.0817], 13); // Bogotá por defecto
+
+        // Capa base de OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Cargar un archivo GeoJSON (ruta ejemplo: parques.geojson)
+        fetch('parques.geojson')
+            .then(response => response.json())
+            .then(data => {
+                L.geoJSON(data).addTo(map);
+            })
+            .catch(error => console.error('Error cargando el GeoJSON:', error));
+    </script>
+</body>
+</html>
