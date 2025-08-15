@@ -111,8 +111,6 @@ footer {
   filter: hue-rotate(95deg) saturate(1.25) brightness(1.02);
 }
 
-
-
 /* Tooltip con imagen al hover */
 .leaflet-tooltip.foto-tooltip {
   background: rgba(255,255,255,0.96);
@@ -136,3 +134,16 @@ footer {
   height: auto;
   border-radius: 8px;
 }
+/* Estilizar Tooltip */
+.leaflet-tooltip.foto-tooltip{
+  background: rgba(255,255,255,.96);
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
+  border-radius: 10px;
+  padding: .5rem .6rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  max-width: 260px;
+  white-space: normal;
+}
+.foto-tooltip .tt-titulo{ font-weight:700; margin-bottom:.35rem; }
+.foto-tooltip img{ display:block; width:100%; height:auto; border-radius:8px; }
