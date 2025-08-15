@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Parques - Arborizadora Avanza</title>
+
     <link rel="stylesheet" href="estilos.css">
-    <script src="programa.js" defer></script>
+    <script src="programa.js" defer></script> <!-- Deja solo ESTA referencia -->
+
     <style>
         /* Estilo para la sección dividida */
         .contenedor-parques {
@@ -17,15 +19,17 @@
         .mapa {
             flex: 1;
             min-width: 300px;
-            height: 400px;
+            height: 420px; /* <- subí un poco el alto del visor */
             background-color: #e0e0e0; /* Color temporal para ver el contenedor */
+            border-radius: 10px;       /* opcional: bordes suaves */
+            overflow: hidden;          /* opcional: recorte de tiles */
         }
         .descripcion {
             flex: 1;
             min-width: 300px;
         }
     </style>
-    <script src="programa.js" defer></script>
+
     <style>
         /* Estilos básicos del menú desplegable */
         nav ul {
@@ -118,22 +122,5 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-    <script>
-        // Inicializar mapa Leaflet
-        var map = L.map('map').setView([4.6097, -74.0817], 13); // Bogotá por defecto
-
-        // Capa base de OpenStreetMap
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-
-        // Cargar un archivo GeoJSON (ruta ejemplo: parques.geojson)
-        fetch('parques.geojson')
-            .then(response => response.json())
-            .then(data => {
-                L.geoJSON(data).addTo(map);
-            })
-            .catch(error => console.error('Error cargando el GeoJSON:', error));
-    </script>
 </body>
 </html>
