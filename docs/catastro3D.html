@@ -17,24 +17,33 @@
     Altura = pisos × 3 m. Click para ver atributos.
   </div>
   <script>
-    // 1) Configurar Cesium
+    // 1) Configuración de Cesium
     Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4NTIyNDlhYy03OGZhLTRkNTctYjhhOC01NGFlYTRmZGFhNTQiLCJpZCI6MzMxMzcwLCJpYXQiOjE3NTUwNDI1OTF9.01glnnDUpehAFVaOO5v6Vfk5XnvjyEPt6wgYd7jP_9c';
 
     const viewer = new Cesium.Viewer('cesiumContainer', {
-      terrain: Cesium.Terrain.fromWorldTerrain(),
-      timeline: false, animation: false, geocoder: false,
-      baseLayerPicker: true, shadows: false
+      terrain: null,  // Desactiva el terrain (lo deshabilitamos)
+      timeline: false,
+      animation: false,
+      geocoder: false,
+      baseLayerPicker: false,  // Deshabilita el selector de capas base
+      imageryProviderViewModels: [], // Elimina las opciones de mapa base predeterminado
+      sceneModePicker: false,  // Elimina las opciones de vista 2D/3D
+      navigationHelpButton: false,  // Desactiva el botón de ayuda para navegación
+      fullscreenButton: false, // Desactiva el botón de pantalla completa
+      homeButton: false, // Desactiva el botón de "home"
+      vrButton: false, // Desactiva el botón VR
+      selectionIndicator: false, // Desactiva el indicador de selección
     });
 
-    // (Opcional) centra la cámara sobre Arborizadora Alta (aprox)
+    // Centra la cámara sobre Arborizadora Alta con las coordenadas correctas
     viewer.camera.setView({
-      destination: Cesium.Cartesian3.fromDegrees(-74.157, 4.565, 2500) // lon, lat, altura (m)
+      destination: Cesium.Cartesian3.fromDegrees(-74.16566125684365, 4.566368155732512, 2500) // longitud, latitud, altura (en metros)
     });
 
-    // 2) Cargar y extruir CONSTRUCCIONES
+    // 2) Cargar y extruir las CONSTRUCCIONES
     Cesium.GeoJsonDataSource.load('arbalta_construcciones_4326.geojson', {
-      clampToGround: false   // extrusión sobre el elipsoide/terreno
-    }).then(ds => {
+      clampToGround: false  // Desactiva el ajuste al terreno (para poder extruir los edificios)
+    }).then(function(ds) {
       viewer.dataSources.add(ds);
 
       const entities = ds.entities.values;
@@ -42,50 +51,54 @@
         const e = entities[i];
         if (!e.polygon) continue;
 
-        // Lee pisos (campo CONNPISOS)
+        // Procesa el número de pisos
         const pisosProp = e.properties && e.properties.CONNPISOS;
-        const pisos = pisosProp ? Number(pisosProp.getValue()) : 1;  // fallback = 1
+        const pisos = pisosProp ? Number(pisosProp.getValue()) : 1;
+        const altura = Math.max(1, pisos) * 3; // 3 metros por piso
 
-        const altura = Math.max(1, pisos) * 3; // metros (3m por piso)
-
+        // Establece la extrusión de altura para las construcciones
         e.polygon.extrudedHeight = altura;
-        e.polygon.height = 0; // base a nivel 0; si tienes z-base, cámbialo
-        e.polygon.material = new Cesium.ColorMaterialProperty(Cesium.Color.fromRandom({alpha:0.85}));
+        e.polygon.height = 0;  // Base nivel 0 (sin ajuste al terreno)
+        e.polygon.material = Cesium.Color.fromRandom({ alpha: 0.85 });
         e.polygon.outline = true;
         e.polygon.outlineColor = Cesium.Color.BLACK;
 
-        // Tooltip sencillo
+        // Tooltip con información de la construcción
         e.description = `
           <table>
-            <tr><th style="text-align:left">Pisos</th><td>${pisos}</td></tr>
-            <tr><th style="text-align:left">Altura (m)</th><td>${altura}</td></tr>
+            <tr><th>Pisos</th><td>${pisos}</td></tr>
+            <tr><th>Altura (m)</th><td>${altura}</td></tr>
           </table>`;
       }
 
-      // Ajuste de cámara a la capa
+      // Ajusta la cámara para centrarse en las construcciones cargadas
       viewer.flyTo(ds);
-    }).catch(err => console.error('Error cargando construcciones:', err));
+    }).catch(function(error) {
+      console.error("Error al cargar el GeoJSON de construcciones:", error);
+    });
 
-    // 3) (Opcional) Cargar PREDIOS como líneas para contexto
-    Cesium.GeoJsonDataSource.load('arbalta_predios_4326.geojson', { clampToGround: true })
-      .then(dsPred => {
-        viewer.dataSources.add(dsPred);
-        const ents = dsPred.entities.values;
-        for (let i = 0; i < ents.length; i++) {
-          const e = ents[i];
-          if (e.polygon) {
-            // Mostrar solo borde (sin extrusión)
-            e.polygon.material = Cesium.Color.TRANSPARENT;
-            e.polygon.outline = true;
-            e.polygon.outlineColor = Cesium.Color.fromCssColorString('#00a1ff').withAlpha(0.9);
-          }
-          if (e.polyline) {
-            e.polyline.material = Cesium.Color.fromCssColorString('#00a1ff').withAlpha(0.9);
-            e.polyline.width = 1.5;
-          }
+    // 3) Cargar los PREDIOS sin extrusión (solo contornos)
+    Cesium.GeoJsonDataSource.load('arbalta_predios_4326.geojson', {
+      clampToGround: false  // No clamping al terreno para que los contornos no se vean afectados
+    }).then(function(dsPred) {
+      viewer.dataSources.add(dsPred);
+      const ents = dsPred.entities.values;
+      for (let i = 0; i < ents.length; i++) {
+        const e = ents[i];
+        if (e.polygon) {
+          // Mostrar solo el contorno sin extrusión
+          e.polygon.material = Cesium.Color.TRANSPARENT;
+          e.polygon.outline = true;
+          e.polygon.outlineColor = Cesium.Color.fromCssColorString('#00a1ff').withAlpha(0.9);
         }
-      })
-      .catch(() => {/* predios opcional */});
+        if (e.polyline) {
+          e.polyline.material = Cesium.Color.fromCssColorString('#00a1ff').withAlpha(0.9);
+          e.polyline.width = 1.5;
+        }
+      }
+    }).catch(function(error) {
+      console.error("Error al cargar el GeoJSON de predios:", error);
+    });
   </script>
 </body>
 </html>
