@@ -3,31 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Equipamientos - Arborizadora Alta</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Equipamientos - Arborizadora Avanza</title>
+    <link rel="stylesheet" href="estilos.css">
+    <script src="programa.js" defer></script>
+    <style>
+        /* Estilo para la sección dividida */
+        .contenedor-parques {
+            display: flex;
+            flex-wrap: wrap; /* Para que en pantallas pequeñas se apilen */
+            gap: 20px;
+            padding: 20px;
+        }
+        .mapa {
+            flex: 1;
+            min-width: 300px;
+            height: 400px;
+            background-color: #e0e0e0; /* Color temporal para ver el contenedor */
+        }
+        .descripcion {
+            flex: 1;
+            min-width: 300px;
+        }
+    </style>
+    <script src="programa.js" defer></script>
+    <style>
+        /* Estilos básicos del menú desplegable */
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+        nav ul li {
+            position: relative;
+        }
+        nav ul li a {
+            display: block;
+            padding: 10px 15px;
+            color: white;
+            text-decoration: none;
+        }
+        nav ul li:hover {
+            background-color: #256428;
+        }
+        /* Menú desplegable oculto por defecto */
+        nav ul li ul {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #2e7d32;
+            min-width: 150px;
+            z-index: 1000;
+        }
+        nav ul li ul li a {
+            padding: 10px;
+        }
+        /* Mostrar submenú al pasar el mouse */
+        nav ul li:hover ul {
+            display: block;
+        }
+    </style>
 </head>
-<script src="js/programa.js" defer></script>
-</body>
 <body>
-
     <header>
-        <img src="img/logo.jpeg" alt="Logo Empresa">
+        <div class="logo-container">
+            <img src="logo.jpeg" alt="Logo">
+            <h1>ARBORIZADORA ALTAa</h1>
+        </div>
+        <!-- Barra de navegación -->
         <nav>
-            <a href="index.html">Inicio</a>
-            <a href="equipamientos.html">Equipamientos</a>
-            <a href="problematicas.html">Problemáticas</a>
-            <a href="acercade.html">Acerca de</a>
+            <ul>
+                <li><a href="index.html" class="activo">Inicio</a></li>
+                <li>
+                    <a href="#">Equipamientos</a>
+                    <ul>
+                        <li><a href="parques.html">Parques</a></li>
+                    </ul>
+                </li>
+                <li><a href="problematicas.html">Problemáticas</a></li>
+                <li><a href="acerca.html">Acerca de</a></li>
+            </ul>
         </nav>
     </header>
 
     <main>
-        <h2>Equipamientos</h2>
-        <p>Aquí va la información sobre los equipamientos...</p>
+        <h3>Equipamientos de la comunidad</h3>
+        <p>Aquí se mostrará la información sobre equipamientos comunitarios.</p>
     </main>
 
     <footer>
-        <p>© 2025 Arborizadora Alta</p>
+        <p>&copy; 2025 Arborizadora Avanza</p>
     </footer>
-
 </body>
 </html>
