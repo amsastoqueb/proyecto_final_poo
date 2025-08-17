@@ -6,6 +6,44 @@
     <title>Arborizadora Avanza</title>
     <link rel="stylesheet" href="estilos.css">
     <script src="programa.js" defer></script>
+    <style>
+        /* Estilos básicos del menú desplegable */
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+        nav ul li {
+            position: relative;
+        }
+        nav ul li a {
+            display: block;
+            padding: 10px 15px;
+            color: white;
+            text-decoration: none;
+        }
+        nav ul li:hover {
+            background-color: #256428;
+        }
+        /* Menú desplegable oculto por defecto */
+        nav ul li ul {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #2e7d32;
+            min-width: 150px;
+            z-index: 1000;
+        }
+        nav ul li ul li a {
+            padding: 10px;
+        }
+        /* Mostrar submenú al pasar el mouse */
+        nav ul li:hover ul {
+            display: block;
+        }
+    </style>
 </head>
 <body>
     <!-- Encabezado con logo -->
@@ -19,7 +57,12 @@
         <nav>
             <ul>
                 <li><a href="index.html" class="activo">Inicio</a></li>
-                <li><a href="equipamientos.html">Equipamientos</a></li>
+                <li>
+                    <a href="#">Equipamientos</a>
+                    <ul>
+                        <li><a href="parques.html">Parques</a></li>
+                    </ul>
+                </li>
                 <li><a href="problematicas.html">Problemáticas</a></li>
                 <li><a href="acerca.html">Acerca de</a></li>
             </ul>
@@ -46,4 +89,3 @@
     </footer>
 </body>
 </html>
-
