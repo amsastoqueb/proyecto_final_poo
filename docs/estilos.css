@@ -147,3 +147,70 @@ footer {
 }
 .foto-tooltip .tt-titulo{ font-weight:700; margin-bottom:.35rem; }
 .foto-tooltip img{ display:block; width:100%; height:auto; border-radius:8px; }
+
+.titulo-caja{
+  display:inline-block;
+  background:#e8f5e9;           /* verde muy claro (fondo del cuadro) */
+  border:1px solid #a5d6a7;      /* borde verde suave */
+  color:#14532d;                 /* texto verde oscuro para buen contraste */
+  border-radius:12px;
+  padding:10px 14px;
+  box-shadow:0 8px 22px rgba(16,185,129,.15); /* sombra con tinte verde */
+  font-weight:800;
+  letter-spacing:.2px;
+  margin:4px 0 14px;
+}
+
+/* --- FIX: tamaño estable para las gráficas --- */
+/* Carrusel: UNA gráfica visible, sin expansión horizontal */
+.charts-wrapper{ position: relative; overflow: hidden; }   /* ← oculta lo fuera del marco */
+
+.charts-track{
+  display: flex;               /* ← en fila */
+  width: 100%;                 /* ← ancho del contenedor, no crece */
+  gap: 0;                      /* sin huecos entre tarjetas */
+  transform: translateX(0);    /* posición inicial */
+  transition: transform .35s ease;  /* deslizamiento suave */
+  will-change: transform;
+}
+
+.chart-card{
+  flex: 0 0 100%;              /* ← cada tarjeta ocupa exactamente el 100% visible */
+  width: auto;                 /* evita sobresaltos */
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 8px 18px rgba(0,0,0,.06);
+  box-sizing: border-box;      /* padding/borde incluidos */
+}
+
+/* Mantén esto como ya lo tienes: altura estable del canvas */
+.chart-card canvas{
+  display: block;
+  width: 100% !important;
+  height: 280px !important;
+}
+
+/* ===== Bloque de título reutilizable (píldora) ===== */
+:root{
+  --badge-bg: #eaf7ee;      /* verde muy claro */
+  --badge-bd: #a7d7b0;      /* borde verde suave */
+  --badge-tx: #0b4d2b;      /* texto verde oscuro */
+}
+
+.badge-title{
+  display: inline-block;
+  padding: .6rem 1.2rem;
+  background: var(--badge-bg);
+  border: 2px solid var(--badge-bd);
+  border-radius: 9999px;          /* píldora */
+  color: var(--badge-tx);
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 1px 0 rgba(0,0,0,.03) inset, 0 2px 8px rgba(0,0,0,.05);
+  margin: .25rem 0 1rem;
+}
+
+/* Contenedor opcional para separar el título de su sección */
+.page-title{ margin: .25rem 0 1rem; }

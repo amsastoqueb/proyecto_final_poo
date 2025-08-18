@@ -7,7 +7,7 @@
     <title>Parques - Arborizadora Avanza</title>
 
     <link rel="stylesheet" href="estilos.css">
-    <script src="parques.js" defer></script> <!-- Deja solo ESTA referencia -->
+    <script src="programa_parques.js" defer></script> <!-- Deja solo ESTA referencia -->
 
     <style>
         /* Estilo para la sección dividida */
@@ -94,7 +94,7 @@
     <!-- Encabezado con logo -->
     <header>
         <div class="logo-container">
-            <img src="img\logo.jpeg" alt="Logo Arborizadora Alta">
+            <img src="img/logo.jpeg" alt="Logo Arborizadora Alta">
             <h1>ARBORIZADORA ALTA</h1>
         </div>
 
@@ -124,7 +124,9 @@
 
         <!-- Columna derecha: descripción -->
         <div class="descripcion">
-            <h3>Parques y Zonas Verdes</h3>
+            <!-- ===== Título con bloque/píldora reutilizable ===== -->
+            <h2 class="badge-title">Parques y Zonas Verdes</h2>
+
             <p>En Arborizadora Alta contamos con diversos parques que ofrecen espacios de recreación, deporte y contacto con la naturaleza.</p>
             <ul>
                 <li>Parque Principal Arborizadora Alta</li>
@@ -150,15 +152,9 @@
               <div data-nombre-par="Parque La Esperanza">
                 <p>Escenario barrial con juegos infantiles y cancha múltiple.</p>
               </div>
-
-              <!-- Agrega más así:
-              <div data-nombre-par="NOMBRE_PAR EXACTO">
-                <p>Tu descripción con HTML permitido.</p>
-              </div>
-              -->
+              <!-- Más items aquí -->
             </div>
             <!-- ▲▲▲ FIN AÑADIDO -->
-
         </div>
     </section>
 
@@ -170,6 +166,5 @@
     <!-- Librería Leaflet para el mapa -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
 </body>
 </html>
