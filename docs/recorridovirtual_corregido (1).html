@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Recorrido Virtual - Arborizadora Alta</title>
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
+  <style>
+    html, body, #cesiumContainer {
+      width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;
+    }
+    .cesium-viewer-toolbar {
+      top: 5px !important;
+      right: 5px !important;
+    }
+  </style>
+</head>
+<body>
+  <div id="cesiumContainer"></div>
+
+  <script>
+    // Usa tu token de Cesium
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4NTIyNDlhYy03OGZhLTRkNTctYjhhOC01NGFlYTRmZGFhNTQiLCJpZCI6MzMxMzcwLCJpYXQiOjE3NTUwNDI1OTF9.01glnnDUpehAFVaOO5v6Vfk5XnvjyEPt6wgYd7jP_9c';
+
+    // Inicializar visor
+    const viewer = new Cesium.Viewer("cesiumContainer", {
+      terrainProvider: Cesium.createDefaultTerrainProviderViewModels()[1].creationFunction(),
+      animation: false,
+      timeline: false,
+      baseLayerPicker: false,
+      geocoder: false,
+      sceneModePicker: false,
+      homeButton: false,
+      navigationHelpButton: true,
+      scene3DOnly: true,
+    });
+
+    // Coordenadas donde quieres posicionar el muñeco
+    const lon = -74.1265;
+    const lat = 4.5747;
+    const height = 2.0; // altura para evitar que flote
+
+    // Posición del muñeco
+    const position = Cesium.Cartesian3.fromDegrees(lon, lat, height);
+
+    // Cargar modelo .glb
+    Cesium.Model.fromGltfAsync({
+      url: "./CesiumMan.glb",
+      modelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(position),
+      scale: 2.0
+    }).then(function(model) {
+      viewer.scene.primitives.add(model);
+      viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(lon, lat, 20),
+        orientation: {
+          heading: Cesium.Math.toRadians(0.0),
+          pitch: Cesium.Math.toRadians(-30.0),
+          roll: 0.0
+        }
+      });
+    }).otherwise(function(error) {
+      console.error("Error cargando modelo GLB:", error);
+    });
+
+    // Cargar construcciones desde GeoJSON
+    viewer.dataSources.add(Cesium.GeoJsonDataSource.load("arbalta_construcciones_4326.geojson", {
+      clampToGround: true
+    })).then(function(dataSource) {
+      const entities = dataSource.entities.values;
+      for (let i = 0; i < entities.length; i++) {
+        const entity = entities[i];
+        const pisos = parseInt(entity.properties.CONNPISOS || 1);
+        entity.polygon.extrudedHeight = pisos * 3;
+        entity.polygon.material = Cesium.Color.fromRandom({ alpha: 1.0 });
+        entity.polygon.outline = true;
+        entity.polygon.outlineColor = Cesium.Color.BLACK;
+
+        entity.description = "Número de pisos: ${pisos} <br>Altura estimada: ${pisos * 3} m";
+      }
+    });
+
+    // Mensaje informativo
+    viewer.infoBox.viewModel.showInfo = true;
+    viewer.infoBox.viewModel.description = "Haz clic sobre una construcción para ver su número de pisos y altura.";
+  </script>
+</body>
+</html>

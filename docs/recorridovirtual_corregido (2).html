@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Recorrido Virtual - Arborizadora Alta</title>
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
+  <style>
+    #cesiumContainer {
+      width: 100%;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+      display: block;
+    }
+
+    .botones {
+      position: absolute;
+      top: 50px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 10;
+    }
+
+    .boton {
+      padding: 10px 15px;
+      background-color: #165c2d;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .leyenda {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <div id="cesiumContainer"></div>
+
+  <div class="botones">
+    <button class="boton" onclick="mover('adelante')">Avanzar</button>
+    <button class="boton" onclick="mover('atras')">Retroceder</button>
+    <button class="boton" onclick="mover('izquierda')">Izquierda</button>
+    <button class="boton" onclick="mover('derecha')">Derecha</button>
+  </div>
+
+  <div class="leyenda">
+    <p>Esta página muestra la altura de las construcciones en el barrio Arborizadora Alta, donde cada piso equivale a 3 metros de altura.</p>
+    <p>Haz clic sobre una construcción para ver su número de pisos y altura en metros.</p>
+  </div>
+
+  <script>
+    // Token Cesium Ion
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4NTIyNDlhYy03OGZhLTRkNTctYjhhOC01NGFlYTRmZGFhNTQiLCJpZCI6MzMxMzcwLCJpYXQiOjE3NTUwNDI1OTF9.01glnnDUpehAFVaOO5v6Vfk5XnvjyEPt6wgYd7jP_9c';
+
+    const viewer = new Cesium.Viewer("cesiumContainer", {
+      shouldAnimate: true,
+      terrainProvider: undefined,
+    });
+
+    // Cargar construcciones y extruir por pisos
+    const construccionesURL = './arbalta_construcciones_4326.geojson';
+    Cesium.GeoJsonDataSource.load(construccionesURL, {
+      stroke: Cesium.Color.WHITE,
+      fill: Cesium.Color.fromRandom({ alpha: 1 }),
+      clampToGround: false
+    }).then(dataSource => {
+      viewer.dataSources.add(dataSource);
+      const entities = dataSource.entities.values;
+      for (let i = 0; i < entities.length; i++) {
+        const entity = entities[i];
+        const pisos = parseInt(entity.properties.CONNPISOS || 1);
+        entity.polygon.extrudedHeight = pisos * 3;
+        entity.polygon.material = Cesium.Color.fromRandom({ alpha: 1 });
+        entity.name = "Construcción";
+      }
+    });
+
+    // Mejora visibilidad: fondo negro, sin atmósfera
+    viewer.scene.skyBox.show = false;
+    viewer.scene.skyAtmosphere.show = false;
+    viewer.scene.backgroundColor = Cesium.Color.BLACK;
+
+    // Activa el inspector de Cesium (opcional para depuración)
+    viewer.extend(Cesium.viewerCesiumInspectorMixin);
+
+    // Posición inicial del muñeco
+    const posicionInicial = Cesium.Cartesian3.fromDegrees(-74.16566125684365, 4.566368155732512, 20);
+
+    // Agrega una etiqueta para ver si carga la posición
+    viewer.entities.add({
+      position: posicionInicial,
+      label: {
+        text: "Aquí debería estar el muñeco",
+        font: "14pt sans-serif",
+        fillColor: Cesium.Color.RED,
+        outlineColor: Cesium.Color.WHITE,
+        outlineWidth: 2,
+        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+        verticalOrigin: Cesium.VerticalOrigin.BOTTOM
+      }
+    });
+
+    let personaje = null;
+
+    // Cargar modelo .glb
+    Cesium.Model.fromGltfAsync({
+      url: './CesiumMan.glb',
+      modelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(posicionInicial),
+      scale: 1,
+      minimumPixelSize: 54,
+      maximumScale: 2000
+    }).then(model => {
+      personaje = viewer.scene.primitives.add(model);
+
+      // Solo si boundingSphere está definido
+      if (model.boundingSphere) {
+        viewer.camera.flyToBoundingSphere(model.boundingSphere, {
+          duration: 3,
+          offset: new Cesium.HeadingPitchRange(
+            Cesium.Math.toRadians(0),
+            Cesium.Math.toRadians(-30),
+            10
+          )
+        });
+      } else {
+        console.warn("El modelo se cargó, pero no tiene boundingSphere.");
+      }
+    }).catch((error) => {
+      console.error("Error cargando modelo GLB:", error);
+    });
+
+    function mover(direccion) {
+      if (!personaje) return;
+
+      const vector = {
+        adelante: [0, 0, 1],
+        atras: [0, 0, -1],
+        izquierda: [-1, 0, 0],
+        derecha: [1, 0, 0],
+      }[direccion];
+
+      if (vector) {
+        const m = Cesium.Matrix4.clone(personaje.modelMatrix, new Cesium.Matrix4());
+        const translation = Cesium.Cartesian3.fromElements(vector[0], vector[1], vector[2]);
+        const newMatrix = Cesium.Matrix4.multiplyByTranslation(m, translation, new Cesium.Matrix4());
+        personaje.modelMatrix = newMatrix;
+      }
+    }
+
+    window.mover = mover;
+  </script>
+</body>
+</html>
