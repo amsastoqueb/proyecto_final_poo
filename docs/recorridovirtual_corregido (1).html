@@ -1,87 +1,168 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <title>Recorrido Virtual - Arborizadora Alta</title>
+  <meta charset="UTF-8" />
+  <title>Recorrido Virtual - Completo</title>
   <script src="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Cesium.js"></script>
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
   <style>
-    html, body, #cesiumContainer {
-      width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;
+    #cesiumContainer {
+      width: 100%;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
     }
-    .cesium-viewer-toolbar {
-      top: 5px !important;
-      right: 5px !important;
+
+    .leyenda {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 0.9em;
+      z-index: 10;
     }
   </style>
 </head>
 <body>
   <div id="cesiumContainer"></div>
 
+  <div class="leyenda">
+    <p>Haz clic para mover el muñeco. La cámara lo sigue automáticamente. Evita colisiones con edificios extruidos.</p>
+  </div>
+
   <script>
-    // Usa tu token de Cesium
-    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4NTIyNDlhYy03OGZhLTRkNTctYjhhOC01NGFlYTRmZGFhNTQiLCJpZCI6MzMxMzcwLCJpYXQiOjE3NTUwNDI1OTF9.01glnnDUpehAFVaOO5v6Vfk5XnvjyEPt6wgYd7jP_9c';
+    Cesium.Ion.defaultAccessToken = 'TU_ACCESS_TOKEN';
 
-    // Inicializar visor
     const viewer = new Cesium.Viewer("cesiumContainer", {
-      terrainProvider: Cesium.createDefaultTerrainProviderViewModels()[1].creationFunction(),
-      animation: false,
-      timeline: false,
-      baseLayerPicker: false,
-      geocoder: false,
-      sceneModePicker: false,
-      homeButton: false,
-      navigationHelpButton: true,
-      scene3DOnly: true,
+      terrainProvider: undefined,
+      shouldAnimate: true
     });
 
-    // Coordenadas donde quieres posicionar el muñeco
-    const lon = -74.1265;
-    const lat = 4.5747;
-    const height = 2.0; // altura para evitar que flote
+    viewer.scene.skyBox.show = false;
+    viewer.scene.skyAtmosphere.show = false;
+    viewer.scene.backgroundColor = Cesium.Color.BLACK;
 
-    // Posición del muñeco
-    const position = Cesium.Cartesian3.fromDegrees(lon, lat, height);
+    let personaje;
+    let currentPosition = Cesium.Cartesian3.fromDegrees(-74.16566125684365, 4.566368155732512, 1);
+    let movingInterval = null;
+    let construcciones = [];
 
-    // Cargar modelo .glb
+    // Cargar modelo GLB
     Cesium.Model.fromGltfAsync({
-      url: "./CesiumMan.glb",
-      modelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(position),
-      scale: 2.0
-    }).then(function(model) {
+      url: './CesiumMan.glb',
+      modelMatrix: Cesium.Transforms.headingPitchRollToFixedFrame(currentPosition, new Cesium.HeadingPitchRoll(0, 0, 0)),
+      scale: 1,
+      minimumPixelSize: 64,
+      maximumScale: 2000
+    }).then(function (model) {
+      personaje = model;
       viewer.scene.primitives.add(model);
-      viewer.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(lon, lat, 20),
-        orientation: {
-          heading: Cesium.Math.toRadians(0.0),
-          pitch: Cesium.Math.toRadians(-30.0),
-          roll: 0.0
-        }
-      });
-    }).otherwise(function(error) {
-      console.error("Error cargando modelo GLB:", error);
+      moverCamara(currentPosition, 0);
     });
 
-    // Cargar construcciones desde GeoJSON
-    viewer.dataSources.add(Cesium.GeoJsonDataSource.load("arbalta_construcciones_4326.geojson", {
-      clampToGround: true
-    })).then(function(dataSource) {
+    // Cargar construcciones con extrusión
+    Cesium.GeoJsonDataSource.load('./arbalta_construcciones_4326.geojson', {
+      stroke: Cesium.Color.WHITE,
+      fill: Cesium.Color.fromRandom({ alpha: 1 }),
+      clampToGround: false
+    }).then(dataSource => {
+      viewer.dataSources.add(dataSource);
       const entities = dataSource.entities.values;
-      for (let i = 0; i < entities.length; i++) {
-        const entity = entities[i];
-        const pisos = parseInt(entity.properties.CONNPISOS || 1);
-        entity.polygon.extrudedHeight = pisos * 3;
-        entity.polygon.material = Cesium.Color.fromRandom({ alpha: 1.0 });
-        entity.polygon.outline = true;
-        entity.polygon.outlineColor = Cesium.Color.BLACK;
-
-        entity.description = "Número de pisos: ${pisos} <br>Altura estimada: ${pisos * 3} m";
+      for (let entity of entities) {
+        if (entity.polygon && entity.properties?.CONNPISOS) {
+          const pisos = parseInt(entity.properties.CONNPISOS.getValue() || 1);
+          entity.polygon.extrudedHeight = pisos * 3;
+          entity.polygon.material = Cesium.Color.fromRandom({ alpha: 1 });
+          entity.name = "Construcción";
+          entity.description = "Pisos: ${pisos} <br>Altura estimada: ${pisos * 3} m";
+          construcciones.push(entity);
+        }
       }
     });
 
-    // Mensaje informativo
-    viewer.infoBox.viewModel.showInfo = true;
-    viewer.infoBox.viewModel.description = "Haz clic sobre una construcción para ver su número de pisos y altura.";
+    // Evento de clic para mover
+    viewer.screenSpaceEventHandler.setInputAction(function (click) {
+      const destino = viewer.scene.pickPosition(click.position);
+      if (!Cesium.defined(destino) || !personaje) return;
+      iniciarMovimiento(destino);
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+    function iniciarMovimiento(destino) {
+      if (movingInterval) clearInterval(movingInterval);
+
+      const direction = Cesium.Cartesian3.subtract(destino, currentPosition, new Cesium.Cartesian3());
+      const distance = Cesium.Cartesian3.magnitude(direction);
+      Cesium.Cartesian3.normalize(direction, direction);
+
+      const heading = Math.atan2(direction.x, direction.y);
+      const hpr = new Cesium.HeadingPitchRoll(heading, 0, 0);
+
+      // Activar animación
+      const anim = personaje.activeAnimations;
+      anim.removeAll();
+      anim.addAll({
+        loop: Cesium.ModelAnimationLoop.REPEAT,
+        speedup: 1.0
+      });
+
+      let steps = Math.floor(distance / 0.5);
+      let stepCount = 0;
+      const stepSize = 0.5;
+
+      movingInterval = setInterval(() => {
+        if (stepCount >= steps) {
+          clearInterval(movingInterval);
+          anim.removeAll();
+          personaje.modelMatrix = Cesium.Transforms.headingPitchRollToFixedFrame(destino, hpr);
+          currentPosition = destino;
+          return;
+        }
+
+        // Calcular siguiente paso
+        const nextPos = Cesium.Cartesian3.add(
+          currentPosition,
+          Cesium.Cartesian3.multiplyByScalar(direction, stepSize, new Cesium.Cartesian3()),
+          new Cesium.Cartesian3()
+        );
+
+        // Verificar colisión con edificios
+        const ray = new Cesium.Ray(nextPos, Cesium.Cartesian3.UNIT_Z);
+        const picked = viewer.scene.drillPickFromRay(ray);
+
+        const hayColision = picked.some(p => p.id && p.id.name === "Construcción");
+
+        if (hayColision) {
+          console.warn("Colisión detectada. Movimiento detenido.");
+          clearInterval(movingInterval);
+          anim.removeAll();
+          return;
+        }
+
+        // Mover muñeco
+        personaje.modelMatrix = Cesium.Transforms.headingPitchRollToFixedFrame(nextPos, hpr);
+        currentPosition = nextPos;
+        moverCamara(currentPosition, heading);
+        stepCount++;
+      }, 50);
+    }
+
+    // Cámara inteligente que gira con el heading
+    function moverCamara(pos, headingRad) {
+      const localMatrix = Cesium.Transforms.headingPitchRollToFixedFrame(pos, new Cesium.HeadingPitchRoll(headingRad, 0, 0));
+      const offset = new Cesium.Cartesian3(0.0, -6.0, 2.0);
+      const cameraPos = Cesium.Matrix4.multiplyByPoint(localMatrix, offset, new Cesium.Cartesian3());
+
+      viewer.camera.setView({
+        destination: cameraPos,
+        orientation: {
+          heading: headingRad,
+          pitch: Cesium.Math.toRadians(-15),
+          roll: 0.0
+        }
+      });
+    }
   </script>
 </body>
 </html>
