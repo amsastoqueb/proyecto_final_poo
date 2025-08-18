@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Problemáticas - Arborizadora Avanza</title>
+    <title>Parques - Arborizadora Avanza</title>
+
     <link rel="stylesheet" href="estilos.css">
-    <script src="programa.js" defer></script>
+    <script src="movilidad.js" defer></script> <!-- Deja solo ESTA referencia -->
+
     <style>
         /* Estilo para la sección dividida */
         .contenedor-parques {
@@ -16,16 +19,18 @@
         }
         .mapa {
             flex: 1;
-            min-width: 300px;
-            height: 400px;
+            min-width: 500px;
+            height: 720px; /* <- subí un poco el alto del visor */
             background-color: #e0e0e0; /* Color temporal para ver el contenedor */
+            border-radius: 10px;       /* opcional: bordes suaves */
+            overflow: hidden;          /* opcional: recorte de tiles */
         }
         .descripcion {
             flex: 1;
             min-width: 300px;
         }
     </style>
-    <script src="programa.js" defer></script>
+
     <style>
         /* Estilos básicos del menú desplegable */
         nav ul {
@@ -66,15 +71,17 @@
     </style>
 </head>
 <body>
+    <!-- Encabezado con logo -->
     <header>
         <div class="logo-container">
-            <img src="img\logo.jpeg" alt="Logo">
+            <img src="img\logo.jpeg" alt="Logo Arborizadora Alta">
             <h1>ARBORIZADORA ALTA</h1>
         </div>
-        <!-- Barra de navegación -->
+
+        <!-- Barra de navegación con el mismo menú -->
         <nav>
             <ul>
-                <li><a href="index.html" class="activo">Inicio</a></li>
+                <li><a href="index.html">Inicio</a></li>
                 <li>
                     <a href="#">Equipamientos</a>
                     <ul>
@@ -88,13 +95,34 @@
         </nav>
     </header>
 
-    <main>
-        <h3>Problemáticas de la comunidad</h3>
-        <p>En esta sección se detallarán las problemáticas identificadas en la zona.</p>
-    </main>
+    <!-- Sección con mapa y descripción -->
+    <section class="contenedor-parques">
+        <!-- Columna izquierda: mapa -->
+        <div id="map" class="mapa">
+            <!-- Aquí se cargará el mapa con GeoJSON -->
+        </div>
 
+        <!-- Columna derecha: descripción -->
+        <div class="descripcion">
+            <h3>Movilidad</h3>
+            <p>En Arborizadora Alta contamos con diversos parques que ofrecen espacios de recreación, deporte y contacto con la naturaleza.</p>
+            <ul>
+                <li>Parque Principal Arborizadora Alta</li>
+                <li>Parque La Esperanza</li>
+                <li>Parque Infantil Los Pinos</li>
+            </ul>
+            <p>Te invitamos a cuidarlos y disfrutarlos en familia.</p>
+        </div>
+    </section>
+
+    <!-- Pie de página -->
     <footer>
-        <p>&copy; 2025 Arborizadora Avanza</p>
+        <p>&copy; 2025 Arborizadora Avanza. Todos los derechos reservados.</p>
     </footer>
+
+    <!-- Librería Leaflet para el mapa -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
 </body>
 </html>

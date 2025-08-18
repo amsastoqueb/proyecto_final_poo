@@ -55,6 +55,45 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/^_|_$/g,'');    // quitar _ extremos
   }
 
+  /* ====== NUEVO: Mostrar descripción desde el HTML ======
+     Requiere en tu HTML:
+       - Un panel: <div id="detalle-parque" class="detalle-parque">...</div>
+       - Un catálogo oculto:
+         <div id="catalogo-descripciones" hidden>
+           <div data-nombre-par="Parque X"> ...HTML de la descripción... </div>
+         </div>
+  */
+  const DETALLE_HOST_ID = 'detalle-parque';
+  const CATALOGO_ID = 'catalogo-descripciones';
+
+  function norm(s){
+    return String(s || '')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .trim().toLowerCase();
+  }
+
+  function lookupDescripcionPorNombre(nombreParque){
+    const host = document.getElementById(CATALOGO_ID);
+    if (!host) return '';
+    const items = host.querySelectorAll('[data-nombre-par]');
+    const nTarget = norm(nombreParque);
+    for (const el of items){
+      const nThis = norm(el.getAttribute('data-nombre-par'));
+      if (nThis === nTarget) return el.innerHTML; // usamos HTML tal cual lo escribiste
+    }
+    return '';
+  }
+
+  function mostrarDescripcionEnPanel(nombre, htmlDescripcion){
+    const panel = document.getElementById(DETALLE_HOST_ID);
+    if (!panel) return;
+    panel.innerHTML = `
+      <h3>${escapeHtml(nombre || 'Parque')}</h3>
+      ${htmlDescripcion || '<p>Sin descripción disponible.</p>'}
+    `;
+  }
+  // ====== FIN NUEVO ======
+
   // ===== Robustez de coordenadas =====
   function isLonLat([x, y]) { return Math.abs(x) <= 180 && Math.abs(y) <= 90; }
   function isLatLon([x, y]) { return Math.abs(x) <= 90  && Math.abs(y) <= 180; }
@@ -232,6 +271,13 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       `;
       layer.bindPopup(popupHTML);
+
+      // ====== NUEVO: click -> mostrar descripción del HTML en el panel derecho ======
+      layer.on('click', () => {
+        const htmlDesc = lookupDescripcionPorNombre(nombre); // lee el bloque del catálogo HTML
+        mostrarDescripcionEnPanel(nombre, htmlDesc);         // pinta en #detalle-parque
+      });
+      // ====== FIN NUEVO ======
 
       // Resaltado hover
       layer.on({
