@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arborizadora Avanza</title>
     <link rel="stylesheet" href="estilos.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
     <script src="programa.js" defer></script>
     <style>
         /* Estilos básicos del menú desplegable */
@@ -26,7 +27,6 @@
         nav ul li:hover {
             background-color: #256428;
         }
-        /* Menú desplegable oculto por defecto */
         nav ul li ul {
             display: none;
             position: absolute;
@@ -39,9 +39,33 @@
         nav ul li ul li a {
             padding: 10px;
         }
-        /* Mostrar submenú al pasar el mouse */
         nav ul li:hover ul {
             display: block;
+        }
+
+        /* Estilos para el mapa */
+        #map {
+            height: 600px;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        /* Botones del mapa */
+        .map-buttons {
+            margin: 10px 0;
+            display: flex;
+            gap: 10px;
+        }
+        .map-buttons button {
+            padding: 10px 15px;
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .map-buttons button:hover {
+            background-color: #256428;
         }
     </style>
 </head>
@@ -49,7 +73,7 @@
     <!-- Encabezado con logo -->
     <header>
         <div class="logo-container">
-            <img src="img\logo.jpeg" alt="Logo Arborizadora Alta">
+            <img src="img/logo.jpeg" alt="Logo Arborizadora Alta">
             <h1>ARBORIZADORA ALTA</h1>
         </div>
 
@@ -71,7 +95,7 @@
 
     <!-- Portada -->
     <section class="portada">
-        <img src="img\portada.jpeg" alt="Portada Arborizadora Alta">
+        <img src="img/portada.jpeg" alt="Portada Arborizadora Alta">
         <div class="texto-portada">
             <h2>ARBORIZADORA ALTA</h2>
         </div>
@@ -81,11 +105,21 @@
     <main>
         <h3>Bienvenidos a Arborizadora Avanza</h3>
         <p>Un espacio para conocer y mejorar nuestra comunidad.</p>
+
+        <!-- Mapa con botones -->
+        <div class="map-buttons">
+            <button onclick="verMunicipio()">Ver Bogotá</button>
+            <button onclick="verLocalidad()">Ver Ciudad Bolívar</button>
+            <button onclick="verBarrio()">Ver Arborizadora Alta</button>
+        </div>
+        <div id="map"></div>
     </main>
 
     <!-- Pie de página -->
     <footer>
         <p>&copy; 2025 Arborizadora Avanza. Todos los derechos reservados.</p>
     </footer>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 </body>
 </html>
