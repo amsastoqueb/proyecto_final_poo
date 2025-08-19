@@ -7,58 +7,13 @@
     
     <!-- CSS de Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <!-- Tu CSS -->
+    <link rel="stylesheet" href="estilos.css">
 
     <style>
 
-    /* Menú principal */
-.menu {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    gap: 20px;
-    background-color: transparent; /* <-- menú principal transparente */
-    position: relative;  
-    z-index: 1000;       
-}
-
-/* Links del menú */
-.menu a {
-    text-decoration: none;
-    color: #2e7d32;
-    padding: 10px 15px;
-    display: block;
-}
-
-/* Dropdown / Submenu */
-.submenu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    background-color: #f5f5f5; /* <-- fondo sólido solo para el submenu */
-    border: 1px solid #ccc;
-    z-index: 1000;
-}
-
-/* Mostrar submenu al pasar el mouse */
-.menu li.dropdown {
-    position: relative; /* referencia para el submenu */
-}
-
-.menu li.dropdown:hover .submenu {
-    display: block;
-}
         /* Estilo del body y contenedor principal */
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            font-family: Arial, sans-serif;
-        }
+        
 
         .container {
             display: flex;
@@ -72,14 +27,6 @@
             height: 100%;
         }
 
-        /* Contenedor de descripción */
-        .description {
-            flex: 1;
-            padding: 20px;
-            background-color: #f5f5f5;
-            overflow-y: auto;
-        }
-
         .description h2 {
             margin-top: 0;
         }
@@ -91,58 +38,42 @@
     --blanco: #ffffff;
     --gris: #f4f4f4;
 }
-
-body {
-    margin: 0;
-    font-family: 'Segoe UI', Tahoma, sans-serif;
-    background-color: var(--gris);
-}
-
-/* Encabezado */
-header {
-    background-color: var(--verde-principal);
-    padding: 10px 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.logo-container {
-    display: flex;
-    align-items: center;
-}
-
-.logo-container img {
-    height: 60px;
-    margin-right: 10px;
-    border-radius: 8px;
-}
-
-.logo-container h1 {
-    margin: 0;
-    color: var(--verde-oscuro);
-}
-
-/* Navegación */
-nav ul {
-    list-style: none;
-    padding: 0;
-    margin: 10px 0 0;
-    display: flex;
-    gap: 20px;
-}
-
-nav ul li a {
-    text-decoration: none;
-    color: var(--verde-oscuro);
-    font-weight: bold;
-    transition: color 0.3s;
-}
-
-nav ul li a:hover,
-nav ul li a.activo {
-    color: #2f4f4f;
-}
+        /* Estilos básicos del menú desplegable */
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+        nav ul li {
+            position: relative;
+        }
+        nav ul li a {
+            display: block;
+            padding: 10px 15px;
+            color: white;
+            text-decoration: none;
+        }
+        nav ul li:hover {
+            background-color: #256428;
+        }
+        /* Menú desplegable oculto por defecto */
+        nav ul li ul {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #2e7d32;
+            min-width: 150px;
+            z-index: 1000;
+        }
+        nav ul li ul li a {
+            padding: 10px;
+        }
+        /* Mostrar submenú al pasar el mouse */
+        nav ul li:hover ul {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -157,12 +88,13 @@ nav ul li a.activo {
         <!-- Barra de navegación -->
         <nav>
         <ul class="menu">
-        <li><a href="index.html" class="activo">Inicio</a></li>
+        <li><a href="index.html" >Inicio</a></li>
         <li class="dropdown">
-            <a href="#">Equipamientos ▾</a>
+            <a href="#" class="activo">Equipamientos</a>
             <ul class="submenu">
                 <li><a href="parques.html">Parques</a></li>
-                <li><a href="vias.html">Vías</a></li>
+                <li><a href="movilidad.html">Movilidad</a></li>
+                <li><a href="vias.html" class="activo">Vías</a></li>
             </ul>
         </li>
         <li><a href="problematicas.html">Problemáticas</a></li>
@@ -179,8 +111,7 @@ nav ul li a.activo {
     <div class="description" style="flex: 1; background-color: rgba(240, 252, 242, 0.1); /* verde pastel con 80% de opacidad */
 border: 2px solid rgba(46, 125, 50, 1); border-radius: 8px; padding: 20px; overflow-y: auto;">
         <!-- Subtítulo VIAS -->
-        <h2 style="text-align: center; color: #2e7d32; margin-top: 0;">VIAS</h2>
-
+        <center><h2 class="badge-title">VIAS</h2></center>
         <h3>Descripción del mapa</h3>
         <p>Este mapa interactivo muestra las principales vías del barrio Arborizadora Alta, ubicado en la localidad de Ciudad Bolívar, al sur de Bogotá. Arborizadora Alta es una zona caracterizada por su crecimiento urbano informal, donde muchas familias han construido sus viviendas de manera autónoma, contribuyendo al desarrollo de la comunidad.</p>
 
