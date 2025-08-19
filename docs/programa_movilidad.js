@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const barrioLayer = L.geoJSON(null, {
     pane:'barrioPane',
     style:()=>({
-      color:'#9333ea',          // ← NUEVO: violeta que combina con morado y azul
+      color:'#0d7588ff',
       weight:5,
       dashArray:'12 6 3 6',
       lineCap:'round',
@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const paraderosLayer = L.geoJSON(null, {
     pane:'paraderosPane',
     pointToLayer:(feature, latlng)=> L.circleMarker(latlng, {
-      radius:5, color:'#7c3aed', weight:2, fillColor:'#a78bfa', fillOpacity:0.95
+      radius:5, color:'#0431acff', weight:2, fillColor:'#0431acff', fillOpacity:0.95
     }),
     onEachFeature:(feature, layer)=>{
       const p = feature.properties || {};
@@ -102,14 +102,14 @@ document.addEventListener('DOMContentLoaded', () => {
       layer.bindTooltip(tt, { sticky:true, className:'paradero-tooltip', direction:'top' });
 
       // IMAGEN según 'direccion_' (exacto -> slug -> placeholder)
-      const imgExact = 'imgparaderos/'+encodeURIComponent(dir)+'.jpg';
-      const imgSlug  = 'imgparaderos/'+toSlug(dir)+'.jpg';
+      const imgExact = 'imgmov/'+encodeURIComponent(dir)+'.png';
+      const imgSlug  = 'imgmov/'+toSlug(dir)+'.png';
 
       const popupHTML = `
         <div style="max-width:340px">
           <img src="${imgExact}" alt="${escapeHtml(dir)}"
                style="width:100%;height:auto;border-radius:8px;margin-bottom:.5rem;"
-               onerror="if(!this.dataset.trySlug){this.dataset.trySlug=1;this.src='${imgSlug}';}else{this.onerror=null;this.src='img/placeholder.jpg';}">
+               onerror="if(!this.dataset.trySlug){this.dataset.trySlug=1;this.src='${imgSlug}';}else{this.onerror=null;this.src='imgmov/placeholder.jpg';}">
           <div class="tt-attrs">
             <div><strong>Nombre:</strong> ${escapeHtml(nom)}</div>
             <div><strong>Vía:</strong> ${escapeHtml(via || '—')}</div>
