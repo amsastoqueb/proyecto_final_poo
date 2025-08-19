@@ -2,26 +2,29 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Recorrido Virtual - Completo</title>
+  <title>Recorrido Virtual - Tercera Persona</title>
+  <!-- Mantengo 1.115 como usabas -->
   <script src="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Cesium.js"></script>
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
   <style>
-    #cesiumContainer {
+    html, body, #cesiumContainer {
       width: 100%;
       height: 100vh;
       margin: 0;
       padding: 0;
+      overflow: hidden;
+      background: #000;
     }
-
     .leyenda {
       position: absolute;
-      bottom: 10px;
-      left: 10px;
-      background: rgba(255, 255, 255, 0.85);
-      padding: 10px;
-      border-radius: 5px;
+      bottom: 10px; left: 10px;
+      background: rgba(255,255,255,.9);
+      padding: 10px 12px;
+      border-radius: 10px;
       font-size: 0.9em;
       z-index: 10;
+      max-width: 380px;
+      line-height: 1.35;
     }
   </style>
 </head>
@@ -29,14 +32,21 @@
   <div id="cesiumContainer"></div>
 
   <div class="leyenda">
-    <p>Haz clic para mover el muñeco. La cámara lo sigue automáticamente. Evita colisiones con edificios extruidos.</p>
+    <strong>Controles</strong>
+    <ul style="margin:6px 0 0 18px;padding:0;">
+      <li>Haz clic en el mapa: el muñeco <em>mira</em> el destino y <em>camina</em> hacia allá.</li>
+      <li>No atraviesa edificios (evasión simple por huella).</li>
+      <li>La cámara va detrás del muñeco (vista en tercera persona).</li>
+      <li>Puedes girar/zoomear la cámara incluso mientras camina.</li>
+    </ul>
   </div>
 
   <script>
-    Cesium.Ion.defaultAccessToken = 'TU_ACCESS_TOKEN';
+    // ================== Configuración ==================
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4NTIyNDlhYy03OGZhLTRkNTctYjhhOC01NGFlYTRmZGFhNTQiLCJpZCI6MzMxMzcwLCJpYXQiOjE3NTUwNDI1OTF9.01glnnDUpehAFVaOO5v6Vfk5XnvjyEPt6wgYd7jP_9c';
 
     const viewer = new Cesium.Viewer("cesiumContainer", {
-      terrainProvider: undefined,
+      terrainProvider: undefined,     // plano (puedes cambiar a WorldTerrain si quieres)
       shouldAnimate: true
     });
 
@@ -44,25 +54,164 @@
     viewer.scene.skyAtmosphere.show = false;
     viewer.scene.backgroundColor = Cesium.Color.BLACK;
 
-    let personaje;
-    let currentPosition = Cesium.Cartesian3.fromDegrees(-74.16566125684365, 4.566368155732512, 1);
-    let movingInterval = null;
-    let construcciones = [];
+    // ================== Estado general ==================
+    const AVATAR_HEIGHT   = 1.7;  // altura constante (evita quedar enterrado o sobre techos)
+    const STEP_SIZE       = 0.6;  // metros/step (más grande = más rápido)
+    const TICK_MS         = 35;   // ms entre pasos (más bajo = más suave)
+    const STOP_THRESHOLD  = 0.9;  // distancia para detenerse
 
-    // Cargar modelo GLB
+    // Cámara tercera persona (detrás del muñeco mirando su espalda)
+    const CAM_BACK = 8.0;   // distancia detrás
+    const CAM_UP   = 3.0;   // altura sobre el muñeco
+    const CAM_PITCH_DEG = -15; // inclinación hacia abajo
+
+    let personaje;                 // Cesium.Model
+    let currentPosition = Cesium.Cartesian3.fromDegrees(-74.16566125684365, 4.566368155732512, AVATAR_HEIGHT);
+    let currentHeading  = 0.0;     // radianes: orientación del muñeco
+    let movingInterval  = null;
+    let isMoving        = false;
+
+    // Footprints (huellas) para colisiones 2D
+    const footprints = [];
+    let footprintsReady = false;
+    let modelReady = false;
+
+    // ================== Utilidades geométricas ==================
+    function cartesianToCartographicDeg(cart) {
+      const c = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cart);
+      return { lon: Cesium.Math.toDegrees(c.longitude), lat: Cesium.Math.toDegrees(c.latitude), height: c.height };
+    }
+
+    function setHeight(cartesian, h) {
+      const c = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian);
+      return Cesium.Cartesian3.fromRadians(c.longitude, c.latitude, h);
+    }
+
+    function normalizeVec(v) {
+      return Cesium.Cartesian3.normalize(v, new Cesium.Cartesian3());
+    }
+
+    // Heading desde 'from' hacia 'to' en el marco ENU local de 'from'
+    function computeHeading(fromCartesian, toCartesian) {
+      const enu = Cesium.Transforms.eastNorthUpToFixedFrame(fromCartesian);
+      const invEnu = Cesium.Matrix4.inverse(enu, new Cesium.Matrix4());
+      const localTo = Cesium.Matrix4.multiplyByPoint(invEnu, toCartesian, new Cesium.Cartesian3());
+      return Math.atan2(localTo.x, localTo.y);
+    }
+
+    function setModelPose(position, headingRad) {
+      const hpr = new Cesium.HeadingPitchRoll(headingRad, 0, 0);
+      personaje.modelMatrix = Cesium.Transforms.headingPitchRollToFixedFrame(position, hpr);
+    }
+
+    // Rotar dirección horizontal alrededor del "up" local
+    function rotateDirectionAroundUp(origin, dirCartesian3, angleRad) {
+      const enu = Cesium.Transforms.eastNorthUpToFixedFrame(origin);
+      const invEnu = Cesium.Matrix4.inverse(enu, new Cesium.Matrix4());
+      const localDir = Cesium.Matrix4.multiplyByPointAsVector(invEnu, dirCartesian3, new Cesium.Cartesian3());
+
+      const up = new Cesium.Cartesian3(0, 0, 1);
+      const q = Cesium.Quaternion.fromAxisAngle(up, angleRad);
+      const rotMat = Cesium.Matrix3.fromQuaternion(q);
+      const rotatedLocal = Cesium.Matrix3.multiplyByVector(rotMat, localDir, new Cesium.Cartesian3());
+
+      const rotatedGlobal = Cesium.Matrix4.multiplyByPointAsVector(enu, rotatedLocal, new Cesium.Cartesian3());
+      return normalizeVec(rotatedGlobal);
+    }
+
+    // Punto en polígono (ray casting) con lon/lat
+    function pointInPolygon(pt, polygon) {
+      let inside = false;
+      for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        const xi = polygon[i].lon, yi = polygon[i].lat;
+        const xj = polygon[j].lon, yj = polygon[j].lat;
+        const intersect = ((yi > pt.lat) !== (yj > pt.lat)) &&
+                          (pt.lon < (xj - xi) * (pt.lat - yi) / (yj - yi + 1e-12) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    }
+
+    function willCollide(cartesianNext) {
+      const { lon, lat } = cartesianToCartographicDeg(cartesianNext);
+      for (const poly of footprints) {
+        if (pointInPolygon({ lon, lat }, poly)) return true;
+      }
+      return false;
+    }
+
+    // ================== Cámara tercera persona ==================
+    function updateThirdPersonCamera(pos, headingRad) {
+      // Matriz del muñeco según su heading
+      const hpr = new Cesium.HeadingPitchRoll(headingRad, 0, 0);
+      const modelFrame = Cesium.Transforms.headingPitchRollToFixedFrame(pos, hpr);
+
+      // Offset local "detrás y arriba" del muñeco: (X=lado, Y=frente, Z=arriba)
+      // Y negativo = detrás del frente
+      const offsetLocal = new Cesium.Cartesian3(0.0, -CAM_BACK, CAM_UP);
+      const cameraPos = Cesium.Matrix4.multiplyByPoint(modelFrame, offsetLocal, new Cesium.Cartesian3());
+
+      viewer.camera.setView({
+        destination: cameraPos,
+        orientation: {
+          heading: headingRad,                      // mira en la misma dirección del muñeco
+          pitch: Cesium.Math.toRadians(CAM_PITCH_DEG),
+          roll: 0.0
+        }
+      });
+    }
+
+    // ================== Spawn seguro ==================
+    function findFreeSpawn(startPos) {
+      if (!footprintsReady) return setHeight(startPos, AVATAR_HEIGHT);
+      if (!willCollide(startPos)) return setHeight(startPos, AVATAR_HEIGHT);
+
+      const baseDir = Cesium.Cartesian3.UNIT_X; // Este
+      const angles = [];
+      for (let a = 0; a < 360; a += 15) angles.push(a);
+      const maxRadius = 40; // m
+      const stepR = 2;
+
+      for (let r = stepR; r <= maxRadius; r += stepR) {
+        for (const a of angles) {
+          const dir = rotateDirectionAroundUp(startPos, baseDir, Cesium.Math.toRadians(a));
+          const tentative = Cesium.Cartesian3.add(
+            startPos,
+            Cesium.Cartesian3.multiplyByScalar(dir, r, new Cesium.Cartesian3()),
+            new Cesium.Cartesian3()
+          );
+          const flat = setHeight(tentative, AVATAR_HEIGHT);
+          if (!willCollide(flat)) return flat;
+        }
+      }
+      return setHeight(startPos, AVATAR_HEIGHT + 10);
+    }
+
+    function ensureSpawnAndShow() {
+      currentPosition = findFreeSpawn(currentPosition);
+      setModelPose(currentPosition, currentHeading);
+      updateThirdPersonCamera(currentPosition, currentHeading);
+    }
+
+    // ================== Carga Modelo ==================
     Cesium.Model.fromGltfAsync({
       url: './CesiumMan.glb',
-      modelMatrix: Cesium.Transforms.headingPitchRollToFixedFrame(currentPosition, new Cesium.HeadingPitchRoll(0, 0, 0)),
+      modelMatrix: Cesium.Transforms.headingPitchRollToFixedFrame(currentPosition, new Cesium.HeadingPitchRoll(currentHeading, 0, 0)),
       scale: 1,
       minimumPixelSize: 64,
       maximumScale: 2000
-    }).then(function (model) {
+    }).then((model) => {
       personaje = model;
       viewer.scene.primitives.add(model);
-      moverCamara(currentPosition, 0);
+      modelReady = true;
+      if (footprintsReady) ensureSpawnAndShow();
+      else {
+        setModelPose(currentPosition, currentHeading);
+        updateThirdPersonCamera(currentPosition, currentHeading);
+      }
     });
 
-    // Cargar construcciones con extrusión
+    // ================== Carga GeoJSON y footprints ==================
     Cesium.GeoJsonDataSource.load('./arbalta_construcciones_4326.geojson', {
       stroke: Cesium.Color.WHITE,
       fill: Cesium.Color.fromRandom({ alpha: 1 }),
@@ -70,99 +219,114 @@
     }).then(dataSource => {
       viewer.dataSources.add(dataSource);
       const entities = dataSource.entities.values;
-      for (let entity of entities) {
-        if (entity.polygon && entity.properties?.CONNPISOS) {
+
+      for (let i = 0; i < entities.length; i++) {
+        const entity = entities[i];
+        if (Cesium.defined(entity.polygon) && entity.properties && entity.properties.CONNPISOS) {
           const pisos = parseInt(entity.properties.CONNPISOS.getValue() || 1);
-          entity.polygon.extrudedHeight = pisos * 3;
+          entity.polygon.extrudedHeight = pisos * 3; // 3 m/ piso aprox
           entity.polygon.material = Cesium.Color.fromRandom({ alpha: 1 });
           entity.name = "Construcción";
-          entity.description = "Pisos: ${pisos} <br>Altura estimada: ${pisos * 3} m";
-          construcciones.push(entity);
+          entity.description = `Pisos: ${pisos}<br>Altura estimada: ${pisos * 3} m`;
+
+          // Guardar huella 2D para colisión
+          const hierarchy = entity.polygon.hierarchy.getValue(Cesium.JulianDate.now());
+          const positions = hierarchy.positions || hierarchy;
+          const poly = positions.map(p => {
+            const c = Cesium.Ellipsoid.WGS84.cartesianToCartographic(p);
+            return { lon: Cesium.Math.toDegrees(c.longitude), lat: Cesium.Math.toDegrees(c.latitude) };
+          });
+          if (poly.length >= 3) footprints.push(poly);
         }
       }
+
+      footprintsReady = true;
+      if (modelReady) ensureSpawnAndShow();
     });
 
-    // Evento de clic para mover
+    // ================== Click para mover ==================
     viewer.screenSpaceEventHandler.setInputAction(function (click) {
-      const destino = viewer.scene.pickPosition(click.position);
-      if (!Cesium.defined(destino) || !personaje) return;
+      if (!personaje) return;
+      const picked = viewer.scene.pickPosition(click.position);
+      if (!Cesium.defined(picked)) return;
+
+      // Mantener altura de avatar (ignorar techos)
+      const carto = Cesium.Ellipsoid.WGS84.cartesianToCartographic(picked);
+      const destino = Cesium.Cartesian3.fromRadians(carto.longitude, carto.latitude, AVATAR_HEIGHT);
+
       iniciarMovimiento(destino);
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
+    // ================== Movimiento + evasión + cámara TPS ==================
     function iniciarMovimiento(destino) {
       if (movingInterval) clearInterval(movingInterval);
 
-      const direction = Cesium.Cartesian3.subtract(destino, currentPosition, new Cesium.Cartesian3());
-      const distance = Cesium.Cartesian3.magnitude(direction);
-      Cesium.Cartesian3.normalize(direction, direction);
-
-      const heading = Math.atan2(direction.x, direction.y);
-      const hpr = new Cesium.HeadingPitchRoll(heading, 0, 0);
-
-      // Activar animación
       const anim = personaje.activeAnimations;
       anim.removeAll();
-      anim.addAll({
-        loop: Cesium.ModelAnimationLoop.REPEAT,
-        speedup: 1.0
-      });
+      anim.addAll({ loop: Cesium.ModelAnimationLoop.REPEAT, speedup: 1.0 });
 
-      let steps = Math.floor(distance / 0.5);
-      let stepCount = 0;
-      const stepSize = 0.5;
+      // 1) Mirar primero al objetivo
+      currentHeading = computeHeading(currentPosition, destino);
+      setModelPose(currentPosition, currentHeading);
+      updateThirdPersonCamera(currentPosition, currentHeading);
+
+      isMoving = true;
 
       movingInterval = setInterval(() => {
-        if (stepCount >= steps) {
+        const toTarget = Cesium.Cartesian3.subtract(destino, currentPosition, new Cesium.Cartesian3());
+        const dist = Cesium.Cartesian3.magnitude(toTarget);
+
+        if (dist <= STOP_THRESHOLD) {
           clearInterval(movingInterval);
           anim.removeAll();
-          personaje.modelMatrix = Cesium.Transforms.headingPitchRollToFixedFrame(destino, hpr);
           currentPosition = destino;
+          setModelPose(currentPosition, currentHeading);
+          updateThirdPersonCamera(currentPosition, currentHeading);
+          isMoving = false;
           return;
         }
 
-        // Calcular siguiente paso
-        const nextPos = Cesium.Cartesian3.add(
-          currentPosition,
-          Cesium.Cartesian3.multiplyByScalar(direction, stepSize, new Cesium.Cartesian3()),
-          new Cesium.Cartesian3()
-        );
+        // Dirección deseada
+        let desiredDir = normalizeVec(toTarget);
 
-        // Verificar colisión con edificios
-        const ray = new Cesium.Ray(nextPos, Cesium.Cartesian3.UNIT_Z);
-        const picked = viewer.scene.drillPickFromRay(ray);
+        // Evasión simple: probar giros hasta hallar paso libre
+        const candidateAnglesDeg = [0, 10, -10, 20, -20, 30, -30, 45, -45, 60, -60, 90, -90, 120, -120, 150, -150, 180];
+        let nextPosition = null;
+        let nextHeading  = null;
 
-        const hayColision = picked.some(p => p.id && p.id.name === "Construcción");
+        for (const ang of candidateAnglesDeg) {
+          const dirRot = rotateDirectionAroundUp(currentPosition, desiredDir, Cesium.Math.toRadians(ang));
+          const tentative = Cesium.Cartesian3.add(
+            currentPosition,
+            Cesium.Cartesian3.multiplyByScalar(dirRot, STEP_SIZE, new Cesium.Cartesian3()),
+            new Cesium.Cartesian3()
+          );
+          const flat = setHeight(tentative, AVATAR_HEIGHT);
+          if (!willCollide(flat)) {
+            nextPosition = flat;
+            nextHeading  = computeHeading(currentPosition, flat);
+            break;
+          }
+        }
 
-        if (hayColision) {
-          console.warn("Colisión detectada. Movimiento detenido.");
-          clearInterval(movingInterval);
-          anim.removeAll();
+        // Si no hay paso libre, quedarse (no atraviesa)
+        if (!nextPosition) {
+          isMoving = false;
           return;
         }
 
-        // Mover muñeco
-        personaje.modelMatrix = Cesium.Transforms.headingPitchRollToFixedFrame(nextPos, hpr);
-        currentPosition = nextPos;
-        moverCamara(currentPosition, heading);
-        stepCount++;
-      }, 50);
+        // Avanzar, actualizar pose y cámara TPS
+        currentPosition = nextPosition;
+        currentHeading  = nextHeading;
+        setModelPose(currentPosition, currentHeading);
+        updateThirdPersonCamera(currentPosition, currentHeading);
+
+      }, TICK_MS);
     }
 
-    // Cámara inteligente que gira con el heading
-    function moverCamara(pos, headingRad) {
-      const localMatrix = Cesium.Transforms.headingPitchRollToFixedFrame(pos, new Cesium.HeadingPitchRoll(headingRad, 0, 0));
-      const offset = new Cesium.Cartesian3(0.0, -6.0, 2.0);
-      const cameraPos = Cesium.Matrix4.multiplyByPoint(localMatrix, offset, new Cesium.Cartesian3());
-
-      viewer.camera.setView({
-        destination: cameraPos,
-        orientation: {
-          heading: headingRad,
-          pitch: Cesium.Math.toRadians(-15),
-          roll: 0.0
-        }
-      });
-    }
+    // Nota: A diferencia de la versión anterior, aquí NO hacemos que el muñeco
+    // "mire a la cámara" cuando está quieto, para mantener la vista de su espalda
+    // típica de videojuegos. Si quieres ese comportamiento, lo agregamos opcional.
   </script>
 </body>
 </html>
