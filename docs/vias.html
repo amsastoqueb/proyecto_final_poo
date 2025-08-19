@@ -203,7 +203,7 @@ border: 2px solid rgba(46, 125, 50, 1); border-radius: 8px; padding: 20px; overf
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
     // Crear el mapa
-    var map = L.map('map').setView([4.65, -74.05], 12);
+    var map = L.map('map').setView([4.566687, -74.160779], 12);
 
     // Agregar capa base
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -216,7 +216,7 @@ border: 2px solid rgba(46, 125, 50, 1); border-radius: 8px; padding: 20px; overf
         .then(data => {
             var viasLayer = L.geoJSON(data, {
                 style: {
-                    color: 'blue',
+                    color: 'orange',
                     weight: 3
                 },
                 onEachFeature: function (feature, layer) {
