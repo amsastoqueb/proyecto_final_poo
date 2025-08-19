@@ -63,6 +63,80 @@
         nav ul li:hover ul {
             display: block;
         }
+         /* Estilo de los botones grandes */
+        h1 {
+        margin-bottom: 40px;
+    }
+
+    .flip-card {
+        background-color: transparent;
+        width: 100%;
+        perspective: 1000px;
+        margin-bottom: 20px;
+    }
+
+    .flip-card-inner {
+        position: relative;
+        width: 100%;
+        height: 500px;
+        text-align: center;
+        transition: transform 0.8s;
+        transform-style: preserve-3d;
+        cursor: pointer;
+    }
+
+    .flip-card.flipped .flip-card-inner {
+        transform: rotateY(180deg);
+    }
+
+    .flip-card-front, .flip-card-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        border-radius: 10px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    .flip-card-front {
+        background-color: rgba(76, 175, 80, 0.5);
+        color: white;
+        font-size: 24px;
+    }
+
+    .flip-card-front img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+        border-radius: 10px;
+    }
+
+    .flip-card-back {
+        background-color: #fff;
+        color: #333;
+        transform: rotateY(180deg);
+        font-size: 16px;
+        overflow-y: auto;
+    }
+
+    /* Botones pequeños debajo */
+    .small-cards {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+    }
+
+    .flip-card.small {
+        width: 200px;
+        height: 200px;
+        flex: 1 1 200px;
+    }
     </style>
 </head>
 <body>
@@ -89,7 +163,94 @@
 
     <main>
         <h3>Acerca de Arborizadora Avanza</h3>
-        <p>Esta página busca fortalecer el sentido de comunidad en Arborizadora Alta.</p>
+       
+
+        <!-- Boton grande -->
+
+       <div class="flip-card" id="boton1">
+    <div class="flip-card-inner">
+        <div class="flip-card-front">
+            <img src="https://via.placeholder.com/1200x200?text=Arborizadora+Avanza" alt="Arborizadora Avanza">
+        </div>
+        <div class="flip-card-back">
+            En "Arborizadora Avanza", creemos que el conocimiento profundo es el primer paso para la transformación. Somos más que una empresa; somos un puente entre la realidad de un territorio y las decisiones que forjan su futuro. Nos dedicamos a comprender, analizar y comunicar la esencia del barrio Arborizadora Alta, un lugar con un potencial inmenso y desafíos complejos.
+        </div>
+    </div>
+</div>
+
+<!-- Botones pequeños debajo -->
+<div class="small-cards">
+    <div class="flip-card small" id="boton2">
+        <div class="flip-card-inner">
+            <div class="flip-card-front">
+                <img src="https://via.placeholder.com/200?text=Nuestra+Historia" alt="Nuestra Historia">
+            </div>
+            <div class="flip-card-back">
+                Arborizadora Avanza nació de la profunda convicción de que las soluciones más efectivas surgen del entendimiento del contexto real. Fundada en el corazón de Ciudad Bolívar, nuestra empresa se estableció con el propósito de llenar un vacío de información precisa y detallada sobre el barrio Arborizadora Alta. Desde nuestros inicios, nos hemos enfocado en el análisis de datos, la investigación social y la escucha activa de la comunidad, convirtiendo la información en una herramienta poderosa para el desarrollo.
+            </div>
+        </div>
+    </div>
+
+    <div class="flip-card small" id="boton3">
+        <div class="flip-card-inner">
+            <div class="flip-card-front">
+                <img src="https://via.placeholder.com/200?text=Mision+y+Vision" alt="Misión y Visión">
+            </div>
+            <div class="flip-card-back">
+                <strong>Misión:</strong> Nuestra misión es generar conocimiento riguroso y actualizado sobre las dinámicas sociales, económicas y de infraestructura del barrio Arborizadora Alta, proporcionando datos e insights estratégicos para que organizaciones, entidades gubernamentales y la propia comunidad puedan tomar decisiones informadas y sostenibles.<br><br>
+                <strong>Visión:</strong> Aspiramos a ser el referente en la investigación y el análisis territorial en Colombia, demostrando que una comprensión detallada de los barrios es fundamental para construir ciudades más equitativas, seguras y prósperas.
+            </div>
+        </div>
+    </div>
+
+    <div class="flip-card small" id="boton4">
+        <div class="flip-card-inner">
+            <div class="flip-card-front">
+                <img src="https://via.placeholder.com/200?text=Valores" alt="Valores">
+            </div>
+            <div class="flip-card-back">
+                <strong>Integridad:</strong> Actuamos con honestidad y transparencia.<br>
+                <strong>Compromiso Social:</strong> Priorizamos problemáticas que afectan la comunidad.<br>
+                <strong>Excelencia:</strong> Buscamos calidad y precisión en todo nuestro trabajo.<br>
+                <strong>Colaboración:</strong> Trabajo en equipo y alianzas estratégicas.<br>
+                <strong>Innovación:</strong> Adoptamos nuevas tecnologías y enfoques.
+            </div>
+        </div>
+    </div>
+
+    <div class="flip-card small" id="boton5">
+        <div class="flip-card-inner">
+            <div class="flip-card-front">
+                <img src="https://via.placeholder.com/200?text=Que+Hacemos" alt="Qué Hacemos">
+            </div>
+            <div class="flip-card-back">
+                En Arborizadora Avanza, transformamos la información en acción. Realizamos estudios demográficos, análisis de seguridad, mapeo de problemáticas sociales y evaluaciones de infraestructura. Recopilación de datos, análisis y elaboración de informes detallados para tomar decisiones inteligentes.
+            </div>
+        </div>
+    </div>
+
+    <div class="flip-card small" id="boton6">
+        <div class="flip-card-inner">
+            <div class="flip-card-front">
+                <img src="https://via.placeholder.com/200?text=Nuestro+Equipo" alt="Nuestro Equipo">
+            </div>
+            <div class="flip-card-back">
+                Somos un grupo de profesionales apasionados por el análisis social y el desarrollo territorial. Desde sociólogos y economistas hasta urbanistas y expertos en datos, nuestro equipo combina diversas disciplinas para ofrecer una visión integral del barrio Arborizadora Alta.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Script para hacer flip al hacer click
+    const cards = document.querySelectorAll('.flip-card');
+    cards.forEach(card => {
+        card.addEventListener('click', () => {
+            card.classList.toggle('flipped');
+        });
+    });
+</script>
+
     </main>
 
     <footer>
