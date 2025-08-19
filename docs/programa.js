@@ -1,61 +1,77 @@
-document.addEventListener("DOMContentLoaded", () => {
-    console.log("Página cargada correctamente.");
-});
-0
+// Crear el mapa centrado inicialmente en Bogotá
+var map = L.map('map').setView([4.60971, -74.08175], 11);
 
-// Inicializar el mapa centrado en Bogotá
-const map = L.map('map').setView([4.60971, -74.08175], 11);
-
-// Capa base (OpenStreetMap)
+// Agregar capa base de OpenStreetMap
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19,
-  attribution: '&copy; OpenStreetMap contributors'
+    attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-// -------- 1. MUNICIPIO --------
-fetch("https://bogota-laburbano.opendatasoft.com/api/explore/v2.1/catalog/datasets/shapes/records")
-  .then(res => res.json())
-  .then(data => {
-    // Filtrar solo el municipio de Bogotá
-    const bogota = data.results.filter(f => f.nombre_mpi === "SANTAFE DE BOGOTA D.C");
-    
-    bogota.forEach(feature => {
-      L.geoJSON(feature.geo_shape, {
-        style: { 
-          color: "darkgreen",       // Borde verde oscuro
-          weight: 2, 
-          fillColor: "lightgreen",  // Relleno verde claro pastel
-          fillOpacity: 0.5
-        }
-      }).addTo(map).bindPopup("Municipio: SANTAFE DE BOGOTA D.C");
-    });
-  })
-  .catch(err => console.error("Error cargando municipios:", err));
+// Variables para capas GeoJSON
+var municipiosLayer, localidadesLayer, barriosLayer;
 
-// -------- 2. LOCALIDAD --------
-fetch("https://bogota-laburbano.opendatasoft.com/api/explore/v2.1/catalog/datasets/barrios_prueba/records")
-  .then(res => res.json())
-  .then(data => {
-    const localidad = data.results.filter(f => f.Localidad === "Ciudad Bolívar");
-    localidad.forEach(feature => {
-      L.geoJSON(feature.geo_shape, {
-        style: { color: "green", weight: 2, fillOpacity: 0.1 }
-      }).addTo(map).bindPopup("Localidad: Ciudad Bolívar");
-    });
-  })
-  .catch(err => console.error("Error cargando localidades:", err));
+// Función para cargar GeoJSON con filtro y estilo
+function cargarGeoJSON(url, filtro, estilo) {
+    return fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            // Filtrar features según el filtro pasado
+            var featuresFiltradas = data.features.filter(f => {
+                for (let key in filtro) {
+                    if (f.properties[key] !== filtro[key]) return false;
+                }
+                return true;
+            });
+            var geojsonFiltrado = {
+                type: "FeatureCollection",
+                features: featuresFiltradas
+            };
+            // Crear la capa Leaflet
+            return L.geoJSON(geojsonFiltrado, { style: estilo });
+        });
+}
 
-// -------- 3. BARRIO --------
-fetch("https://bogota-laburbano.opendatasoft.com/api/explore/v2.1/catalog/datasets/barrios_prueba/records")
-  .then(res => res.json())
-  .then(data => {
-    const barrio = data.results.filter(f => f.Nombre === "Arborizadora Alta");
-    barrio.forEach(feature => {
-      L.geoJSON(feature.geo_shape, {
-        style: { color: "red", weight: 2, fillOpacity: 0.2 }
-      }).addTo(map).bindPopup("Barrio: Arborizadora Alta");
-    });
-  })
-  .catch(err => console.error("Error cargando barrios:", err));
+// Estilo de los polígonos
+var estiloPoligono = {
+    color: "#0D3B66",     // borde azul oscuro
+    fillColor: "#A9D6E5", // relleno azul pastel
+    weight: 2,
+    opacity: 1,
+    fillOpacity: 0.6
+};
 
+// Funciones para los botones
+function verMunicipio() {
+    if (municipiosLayer) map.removeLayer(municipiosLayer);
+    if (localidadesLayer) map.removeLayer(localidadesLayer);
+    if (barriosLayer) map.removeLayer(barriosLayer);
 
+    cargarGeoJSON('municipios.geojson', {"nombre_mpi": "SANTAFE DE BOGOTA D.C."}, estiloPoligono)
+        .then(layer => {
+            municipiosLayer = layer.addTo(map);
+            map.fitBounds(layer.getBounds());
+        });
+}
+
+function verLocalidad() {
+    if (municipiosLayer) map.removeLayer(municipiosLayer);
+    if (localidadesLayer) map.removeLayer(localidadesLayer);
+    if (barriosLayer) map.removeLayer(barriosLayer);
+
+    cargarGeoJSON('poligonos-localidades.geojson', {"Nombre de la localidad": "CIUDAD BOLIVAR"}, estiloPoligono)
+        .then(layer => {
+            localidadesLayer = layer.addTo(map);
+            map.fitBounds(layer.getBounds());
+        });
+}
+
+function verBarrio() {
+    if (municipiosLayer) map.removeLayer(municipiosLayer);
+    if (localidadesLayer) map.removeLayer(localidadesLayer);
+    if (barriosLayer) map.removeLayer(barriosLayer);
+
+    cargarGeoJSON('barrios.geojson', {"barriocomu": "Arborizadora Alta"}, estiloPoligono)
+        .then(layer => {
+            barriosLayer = layer.addTo(map);
+            map.fitBounds(layer.getBounds());
+        });
+}

@@ -4,76 +4,75 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arborizadora Avanza</title>
-    <link rel="stylesheet" href="estilos.css">
+
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+
+    <!-- Tu CSS -->
+    <link rel="stylesheet" href="estilos.css">
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js" defer></script>
+
+    <!-- Tu JS -->
     <script src="programa.js" defer></script>
+
     <style>
-        /* Estilos básicos del menú desplegable */
-        nav ul {
-            list-style: none;
-            padding: 0;
+        body {
             margin: 0;
-            display: flex;
-        }
-        nav ul li {
-            position: relative;
-        }
-        nav ul li a {
-            display: block;
-            padding: 10px 15px;
-            color: white;
-            text-decoration: none;
-        }
-        nav ul li:hover {
-            background-color: #256428;
-        }
-        nav ul li ul {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background-color: #2e7d32;
-            min-width: 150px;
-            z-index: 1000;
-        }
-        nav ul li ul li a {
-            padding: 10px;
-        }
-        nav ul li:hover ul {
-            display: block;
+            font-family: Arial, sans-serif;
         }
 
-        /* Estilos para el mapa */
+        /* Layout de mapa y sidebar */
+        .map-container {
+            display: flex;
+            height: 80vh; /* Ajusta altura según necesites */
+        }
+
         #map {
-            height: 600px;
-            width: 100%;
-            margin: 20px 0;
+            flex: 2;
+            height: 100%;
         }
 
-        /* Botones del mapa */
-        .map-buttons {
-            margin: 10px 0;
-            display: flex;
-            gap: 10px;
+        .sidebar {
+            flex: 1;
+            background-color: #f5f5f5;
+            padding: 20px;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
         }
+
+        .sidebar h2 {
+            margin-top: 0;
+        }
+
+        .map-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
         .map-buttons button {
-            padding: 10px 15px;
+            padding: 12px;
             background-color: #2e7d32;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
+            font-size: 16px;
         }
+
         .map-buttons button:hover {
             background-color: #256428;
         }
     </style>
 </head>
 <body>
+
     <!-- Encabezado con logo -->
     <header>
         <div class="logo-container">
-            <img src="img/logo.jpeg" alt="Logo Arborizadora Alta">
+            <img src="img/logo.jpeg" alt="Logo Arborizadora Alta" width="80">
             <h1>ARBORIZADORA ALTA</h1>
         </div>
 
@@ -95,31 +94,40 @@
 
     <!-- Portada -->
     <section class="portada">
-        <img src="img/portada.jpeg" alt="Portada Arborizadora Alta">
+        <img src="img/portada.jpeg" alt="Portada Arborizadora Alta" width="100%">
         <div class="texto-portada">
             <h2>ARBORIZADORA ALTA</h2>
         </div>
     </section>
 
-    <!-- Contenido -->
+    <!-- Contenido: mapa y sidebar -->
     <main>
-        <h3>Bienvenidos a Arborizadora Avanza</h3>
-        <p>Un espacio para conocer y mejorar nuestra comunidad.</p>
+        <h1 style="text-align: center; font-size: 2.5em; margin-bottom: 20px;">UBICACIÓN</h1>
 
-        <!-- Mapa con botones -->
-        <div class="map-buttons">
-            <button onclick="verMunicipio()">Ver Bogotá</button>
-            <button onclick="verLocalidad()">Ver Ciudad Bolívar</button>
-            <button onclick="verBarrio()">Ver Arborizadora Alta</button>
+         <div class="map-container" style="display: flex; height: 80vh;">
+        <!-- Lado izquierdo: mapa -->
+        <div id="map" style="flex: 2;"></div>
+
+        <!-- Lado derecho: sidebar con botones y descripción -->
+        <div class="sidebar" style="flex: 1; display: flex; flex-direction: column;">
+            <div class="map-buttons">
+                <h2>Explorar Mapa</h2>
+                <p>Selecciona una vista:</p>
+                <button onclick="verMunicipio()">Ver Bogotá</button>
+                <button onclick="verLocalidad()">Ver Ciudad Bolívar</button>
+                <button onclick="verBarrio()">Ver Arborizadora Alta</button>
+            </div>
+            <!-- Párrafo de descripción -->
+            <div class="descripcion-barrio" style="margin-top: 20px; flex: 1; overflow-y: auto;">
+                <p id="descripcion-texto">
+                    Arborizadora Alta es un barrio ubicado en Bogotá, la capital de Colombia, dentro de la localidad número 19, Ciudad Bolívar, una de las 20 localidades de la ciudad. Se encuentra al sur de Bogotá y se caracteriza por su entorno residencial y la cercanía a zonas verdes y áreas de preservación. Su extensión aproximada es de 0,8 km² y fue fundado en la década de 1970, desarrollándose principalmente como un sector de vivienda popular. El barrio cuenta con servicios básicos, escuelas y pequeñas áreas comerciales, manteniendo un ambiente comunitario típico de Ciudad Bolívar.
+                </p>
+            </div>
         </div>
-        <div id="map"></div>
+    </div>
     </main>
 
-    <!-- Pie de página -->
-    <footer>
-        <p>&copy; 2025 Arborizadora Avanza. Todos los derechos reservados.</p>
-    </footer>
-
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 </body>
 </html>
+
+
