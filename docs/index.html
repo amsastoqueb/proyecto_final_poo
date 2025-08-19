@@ -16,13 +16,8 @@
 
     <!-- Tu JS -->
     <script src="programa.js" defer></script>
-
     <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
-
+        
         /* Layout de mapa y sidebar */
         .map-container {
             display: flex;
@@ -54,7 +49,7 @@
 
         .map-buttons button {
             padding: 12px;
-            background-color: #2e7d32;
+            background-color: #597c66;
             color: white;
             border: none;
             border-radius: 6px;
@@ -63,12 +58,12 @@
         }
 
         .map-buttons button:hover {
-            background-color: #256428;
+            background-color: #6baf6e;
         }
 
         .descripcion-barrio {
         background-color: #d4edda; /* verde pastel */
-        border: 2px solid #2e7d32; /* verde medio oscuro */
+        border: 2px solid #40a345; /* verde medio oscuro */
         border-radius: 8px;         /* esquinas redondeadas */
         padding: 15px;              /* espacio interno */
         margin-top: 20px;           /* separación del resto */
@@ -87,28 +82,105 @@
 </head>
 
 <body>
-
+    <style>
+        /* Estilos básicos del menú desplegable */
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+        nav ul li {
+            position: relative;
+        }
+        nav ul li a {
+            display: block;
+            padding: 10px 15px;
+            color: white;
+            text-decoration: none;
+        }
+        nav ul li:hover {
+            background-color: #256428;
+        }
+        /* Menú desplegable oculto por defecto */
+        nav ul li ul {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #2e7d32;
+            min-width: 150px;
+            z-index: 1000;
+        }
+        nav ul li ul li a {
+            padding: 10px;
+        }
+        /* Mostrar submenú al pasar el mouse */
+        nav ul li:hover ul {
+            display: block;
+        }
+    
+        /* Estilos básicos del menú desplegable */
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+        nav ul li {
+            position: relative;
+        }
+        nav ul li a {
+            display: block;
+            padding: 10px 15px;
+            color: white;
+            text-decoration: none;
+        }
+        nav ul li:hover {
+            background-color: #256428;
+        }
+        /* Menú desplegable oculto por defecto */
+        nav ul li ul {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #2e7d32;
+            min-width: 150px;
+            z-index: 1000;
+        }
+        nav ul li ul li a {
+            padding: 10px;
+        }
+        /* Mostrar submenú al pasar el mouse */
+        nav ul li:hover ul {
+            display: block;
+        }
+    </style>
+</head>
+<body>
     <!-- Encabezado con logo -->
     <header>
         <div class="logo-container">
-            <img src="img/logo.jpeg" alt="Logo Arborizadora Alta" width="80">
+            <img src="img\logo.jpeg" alt="Logo Arborizadora Alta">
             <h1>ARBORIZADORA ALTA</h1>
         </div>
 
         <!-- Barra de navegación -->
         <nav>
-        <ul class="menu">
-        <li><a href="index.html" class="activo">Inicio</a></li>
-        <li class="dropdown">
-            <a href="#">Equipamientos ▾</a>
-            <ul class="submenu">
-                <li><a href="parques.html">Parques</a></li>
-                <li><a href="vias.html">Vías</a></li>
+            <ul>
+                <li><a href="index.html" class="activo">Inicio</a></li>
+                <li>
+                    <a href="#">Equipamientos</a>
+                    <ul>
+                        <li><a href="parques.html">Parques</a></li>
+                        <li><a href="movilidad.html">Movilidad</a></li>
+                        <li><a href="vias.html">Vías</a></li>
+                    </ul>
+                </li>
+                <li><a href="problematicas.html">Problemáticas</a></li>
+                <li><a href="acerca.html">Acerca de</a></li>
             </ul>
-        </li>
-        <li><a href="problematicas.html">Problemáticas</a></li>
-        <li><a href="acerca.html">Acerca de</a></li>
-        </ul>
         </nav>
     </header>
 
@@ -140,7 +212,7 @@
             <!-- Párrafo de descripción -->
             <div class="descripcion-barrio">
                 <p id="descripcion-texto">
-                    <p style="font-size: 22px;">
+                    <p style="font-size: 18px;">
                     Arborizadora Alta es un barrio ubicado en Bogotá, la capital de Colombia, dentro de la localidad número 19, Ciudad Bolívar, una de las 20 localidades de la ciudad. Se encuentra al sur de Bogotá y se caracteriza por su entorno residencial y la cercanía a zonas verdes y áreas de preservación. Su extensión aproximada es de 0,8 km² y fue fundado en la década de 1970, desarrollándose principalmente como un sector de vivienda popular. El barrio cuenta con servicios básicos, escuelas y pequeñas áreas comerciales, manteniendo un ambiente comunitario típico de Ciudad Bolívar.
                     Se destaca por su participación en proyectos ambientales, como la creación de un bosque urbano, en colaboración con grupos socioambientales y la comunidad. 
                     Cuenta con un Centro de Desarrollo Comunitario (CDC) que ofrece cursos gratuitos para diferentes grupos de edad, con énfasis en formación para el emprendimiento y la empleabilidad. 
@@ -150,8 +222,9 @@
         </div>
     </div>
     </main>
-
+    <!-- Pie de página -->
+    <footer>
+        <p>&copy; 2025 Arborizadora Avanza. Todos los derechos reservados.</p>
+    </footer>
 </body>
 </html>
-
-

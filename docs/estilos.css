@@ -1,46 +1,3 @@
-/* Menú principal */
-.menu {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    gap: 20px;
-    background-color: transparent; /* <-- menú principal transparente */
-    position: relative;  
-    z-index: 1000;       
-}
-
-/* Links del menú */
-.menu a {
-    text-decoration: none;
-    color: #2e7d32;
-    padding: 10px 15px;
-    display: block;
-}
-
-/* Dropdown / Submenu */
-.submenu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    background-color: #f5f5f5; /* <-- fondo sólido solo para el submenu */
-    border: 1px solid #ccc;
-    z-index: 1000;
-}
-
-/* Mostrar submenu al pasar el mouse */
-.menu li.dropdown {
-    position: relative; /* referencia para el submenu */
-}
-
-.menu li.dropdown:hover .submenu {
-    display: block;
-}
-
 /* Colores base */
 :root {
     --verde-principal: #a8d5ba;
@@ -190,3 +147,102 @@ footer {
 }
 .foto-tooltip .tt-titulo{ font-weight:700; margin-bottom:.35rem; }
 .foto-tooltip img{ display:block; width:100%; height:auto; border-radius:8px; }
+
+.titulo-caja{
+  display:inline-block;
+  background:#e8f5e9;           /* verde muy claro (fondo del cuadro) */
+  border:1px solid #a5d6a7;      /* borde verde suave */
+  color:#14532d;                 /* texto verde oscuro para buen contraste */
+  border-radius:12px;
+  padding:10px 14px;
+  box-shadow:0 8px 22px rgba(16,185,129,.15); /* sombra con tinte verde */
+  font-weight:800;
+  letter-spacing:.2px;
+  margin:4px 0 14px;
+}
+
+/* --- FIX: tamaño estable para las gráficas --- */
+/* Carrusel: UNA gráfica visible, sin expansión horizontal */
+.charts-wrapper{ position: relative; overflow: hidden; }   /* ← oculta lo fuera del marco */
+
+.charts-track{
+  display: flex;               /* ← en fila */
+  width: 100%;                 /* ← ancho del contenedor, no crece */
+  gap: 0;                      /* sin huecos entre tarjetas */
+  transform: translateX(0);    /* posición inicial */
+  transition: transform .35s ease;  /* deslizamiento suave */
+  will-change: transform;
+}
+
+.chart-card{
+  flex: 0 0 100%;              /* ← cada tarjeta ocupa exactamente el 100% visible */
+  width: auto;                 /* evita sobresaltos */
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 8px 18px rgba(0,0,0,.06);
+  box-sizing: border-box;      /* padding/borde incluidos */
+}
+
+/* Mantén esto como ya lo tienes: altura estable del canvas */
+.chart-card canvas{
+  display: block;
+  width: 100% !important;
+  height: 300px !important;
+}
+
+/* ===== Bloque de título reutilizable (píldora) ===== */
+:root{
+  --badge-bg: #eaf7ee;      /* verde muy claro */
+  --badge-bd: #a7d7b0;      /* borde verde suave */
+  --badge-tx: #0b4d2b;      /* texto verde oscuro */
+}
+
+.badge-title{
+  display: inline-block;
+  padding: .6rem 1.2rem;
+  background: var(--badge-bg);
+  border: 2px solid var(--badge-bd);
+  border-radius: 9999px;          /* píldora */
+  color: var(--badge-tx);
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 1px 0 rgba(0,0,0,.03) inset, 0 2px 8px rgba(0,0,0,.05);
+  margin: .25rem 0 1rem;
+}
+
+/* Contenedor opcional para separar el título de su sección */
+.page-title{ margin: .25rem 0 1rem; }
+
+/* ===== Bloque de descripción bajo el título ===== */
+.page-desc{
+  background:#ffffff;
+  border:1px solid #a7d7b0;
+  border-radius:2px;
+  box-shadow:0 2px 2px rgba(15,23,42,.06);
+  padding:6px 12px;
+  line-height:1.6;
+  /* centrado y ancho cómodo */
+  max-width: 1300px;
+  margin: 4px auto 4px;
+}
+.page-desc p{ margin:0; }
+
+/* Quitar el contorno negro al hacer click en polígonos/puntos */
+.leaflet-container .leaflet-interactive:focus,
+.leaflet-container .leaflet-interactive:active {
+  outline: none !important;
+}
+
+/* También para el botón de cerrar del popup y enlaces de Leaflet */
+.leaflet-container a:focus,
+.leaflet-container .leaflet-popup-close-button:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Evita el highlight azul/negro en móviles WebKit */
+.leaflet-container .leaflet-interactive {
+  -webkit-tap-highlight-color: transparent;
+}

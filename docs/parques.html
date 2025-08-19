@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parques - Arborizadora Avanza</title>
+
+    <link rel="stylesheet" href="estilos.css">
+    <script src="programa_parques.js" defer></script> <!-- Deja solo ESTA referencia -->
+
+    <style>
+        /* Estilo para la sección dividida */
+        .contenedor-parques {
+            display: flex;
+            flex-wrap: wrap; /* Para que en pantallas pequeñas se apilen */
+            gap: 20px;
+            padding: 20px;
+        }
+        .mapa {
+            flex: 1;
+            min-width: 500px;
+            height: 520px; /* <- subí un poco el alto del visor */
+            background-color: #e0e0e0; /* Color temporal para ver el contenedor */
+            border-radius: 10px;       /* opcional: bordes suaves */
+            overflow: hidden;          /* opcional: recorte de tiles */
+        }
+        .descripcion {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        /* (Opcional) estilo suave para el panel de detalle */
+        .detalle-parque{
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 12px 14px;
+            box-shadow: 0 6px 18px rgba(15,23,42,.06);
+            margin-top: 10px;
+        }
+        .detalle-parque h3{
+            margin: 0 0 .35rem 0;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .detalle-parque p{
+            margin: 0;
+            font-size: .95rem;
+            line-height: 1.45;
+        }
+    </style>
+
+    <style>
+        /* Estilos básicos del menú desplegable */
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+        nav ul li {
+            position: relative;
+        }
+        nav ul li a {
+            display: block;
+            padding: 10px 15px;
+            color: white;
+            text-decoration: none;
+        }
+        nav ul li:hover {
+            background-color: #256428;
+        }
+        /* Menú desplegable oculto por defecto */
+        nav ul li ul {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #2e7d32;
+            min-width: 150px;
+            z-index: 1000;
+        }
+        nav ul li ul li a {
+            padding: 10px;
+        }
+        /* Mostrar submenú al pasar el mouse */
+        nav ul li:hover ul {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Encabezado con logo -->
+    <header>
+        <div class="logo-container">
+            <img src="img/logo.jpeg" alt="Logo Arborizadora Alta">
+            <h1>ARBORIZADORA ALTA</h1>
+        </div>
+
+        <!-- Barra de navegación con el mismo menú -->
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li>
+                    <a href="#">Equipamientos</a>
+                    <ul>
+                        <li><a href="parques.html">Parques</a></li>
+                        <li><a href="movilidad.html">Movilidad</a></li>
+                    </ul>
+                </li>
+                <li><a href="problematicas.html">Problemáticas</a></li>
+                <li><a href="acerca.html">Acerca de</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Sección con mapa y descripción -->
+    <section class="contenedor-parques">
+        <!-- Columna izquierda: mapa -->
+        <div id="map" class="mapa">
+            <!-- Aquí se cargará el mapa con GeoJSON -->
+        </div>
+
+        <!-- Columna derecha: descripción -->
+        <div class="descripcion">
+            <!-- ===== Título con bloque/píldora reutilizable ===== -->
+            <h2 class="badge-title">Parques y Zonas Verdes</h2>
+
+            <p style="text-align: justify;">El barrio Arborizadora Alta cuenta con diversos parques que ofrecen espacios de recreación, deporte y contacto con la naturaleza. Los siguientes son los parques del sector:
+            <ul>
+                <li>Parque Arborizadora Alta</li>
+                <li>Parque Desarrollo Arborizadora Alta</li>
+                <li>Parque Desarrollo Jerusalem</li>
+                <li>Parque Juan Jose Rondon</li>
+                <li>Parque Urbanizacion Arborizadora Alta</li>
+                <li>Parque Urbanización Candelaria La Nueva Primer Sector</li>
+            </ul>
+               Te invitamos a cuidarlos y disfrutarlos en familia.</p>
+
+            <!-- ▼▼▼ AÑADIDO: panel de detalle que se actualizará al hacer clic en un polígono -->
+            <div id="detalle-parque" class="detalle-parque">
+              <h3>Selecciona un parque en el mapa</h3>
+              <p>Al hacer clic sobre un polígono, verás aquí su descripción.</p>
+            </div>
+            <!-- ▲▲▲ FIN AÑADIDO -->
+
+            <!-- ▼▼▼ AÑADIDO: catálogo oculto con descripciones por NOMBRE_PAR -->
+            <div id="catalogo-descripciones" hidden>
+              <!-- Usa el valor EXACTO de NOMBRE_PAR en data-nombre-par -->
+              <div data-nombre-par="Parque Principal Arborizadora Alta">
+                <p>Parque central del barrio, con senderos, arbolado y zonas de estancia.</p>
+              </div>
+
+              <div data-nombre-par="Parque La Esperanza">
+                <p>Escenario barrial con juegos infantiles y cancha múltiple.</p>
+              </div>
+              <!-- Más items aquí -->
+            </div>
+            <!-- ▲▲▲ FIN AÑADIDO -->
+        </div>
+    </section>
+
+    <!-- Pie de página -->
+    <footer>
+        <p>&copy; 2025 Arborizadora Avanza. Todos los derechos reservados.</p>
+    </footer>
+
+    <!-- Librería Leaflet para el mapa -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</body>
+</html>

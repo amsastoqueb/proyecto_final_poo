@@ -1,0 +1,86 @@
+<!DOCTYPE html> 
+<html lang="es">
+<head>
+    <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movilidad - Arborizadora Avanza</title>
+
+    <link rel="stylesheet" href="estilos.css">
+    <script src="programa_movilidad.js" defer></script>
+
+    <style>
+        .contenedor-movilidad {
+            display: flex; flex-wrap: wrap; gap: 20px; padding: 20px;
+        }
+        .mapa {
+            flex: 1; min-width: 500px; height: 400px;
+            background-color: #e0e0e0; border-radius: 10px; overflow: hidden;
+        }
+        /* Tooltips opcionales */
+        .leaflet-tooltip.rutas-tooltip,
+        .leaflet-tooltip.paradero-tooltip {
+            background: rgba(255,255,255,0.97);
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: .45rem .55rem;
+            box-shadow: 0 8px 24px rgba(0,0,0,.08);
+            font-size: .92rem;
+            white-space: normal;
+        }
+
+        /* Menú (igual) */
+        nav ul { list-style:none; padding:0; margin:0; display:flex; }
+        nav ul li { position:relative; }
+        nav ul li a { display:block; padding:10px 15px; color:white; text-decoration:none; }
+        nav ul li:hover { background-color:#256428; }
+        nav ul li ul {
+            display:none; position:absolute; top:100%; left:0; background-color:#2e7d32; min-width:150px; z-index:1000;
+        }
+        nav ul li ul li a { padding:10px; }
+        nav ul li:hover ul { display:block; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="img\logo.jpeg" alt="Logo Arborizadora Alta">
+            <h1>ARBORIZADORA ALTA</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li>
+                    <a href="#">Equipamientos</a>
+                    <ul>
+                        <li><a href="parques.html">Parques</a></li>
+                        <li><a href="movilidad.html">Movilidad</a></li>
+                    </ul>
+                </li>
+                <li><a href="problematicas.html">Problemáticas</a></li>
+                <li><a href="acerca.html">Acerca de</a></li>
+            </ul>
+        </nav>
+    </header>
+
+   <center><h2 class="badge-title">Movilidad</h2></center>
+
+    <!-- NUEVO: bloque blanco de descripción -->
+    <div class="page-desc">
+      <center><small><p>
+        Este visor muestra la movilidad urbana en Arborizadora Alta: rutas del SITP que ingresan o bordean el barrio y sus paraderos. Explóralo para planear tus desplazamientos cotidianos y ubicar los puntos de acceso al sistema
+      </p></small></center>
+    </div>
+
+    <section class="contenedor-movilidad">
+        <div id="map" class="mapa"></div>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 Arborizadora Avanza. Todos los derechos reservados.</p>
+    </footer>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</body>
+</html>
