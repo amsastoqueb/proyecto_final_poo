@@ -76,3 +76,5 @@ function verBarrio() {
             map.fitBounds(layer.getBounds());
         });
 }
+// Cargar Bogotá automáticamente al iniciar
+map.whenReady(verMunicipio);   // también puede ser: verMunicipio();
