@@ -65,6 +65,24 @@
         .map-buttons button:hover {
             background-color: #256428;
         }
+
+        .descripcion-barrio {
+        background-color: #d4edda; /* verde pastel */
+        border: 2px solid #2e7d32; /* verde medio oscuro */
+        border-radius: 8px;         /* esquinas redondeadas */
+        padding: 15px;              /* espacio interno */
+        margin-top: 20px;           /* separación del resto */
+        flex: 1;
+        overflow-y: auto;
+        font-size: 1em;
+        line-height: 1.5;
+
+        display: flex;              /* activa flexbox */
+        justify-content: center;    /* centra horizontalmente */
+        align-items: center;        /* centra verticalmente */
+        text-align: center;
+        }
+
     </style>
 </head>
 <body>
@@ -118,9 +136,11 @@
                 <button onclick="verBarrio()">Ver Arborizadora Alta</button>
             </div>
             <!-- Párrafo de descripción -->
-            <div class="descripcion-barrio" style="margin-top: 20px; flex: 1; overflow-y: auto;">
+            <div class="descripcion-barrio">
                 <p id="descripcion-texto">
                     Arborizadora Alta es un barrio ubicado en Bogotá, la capital de Colombia, dentro de la localidad número 19, Ciudad Bolívar, una de las 20 localidades de la ciudad. Se encuentra al sur de Bogotá y se caracteriza por su entorno residencial y la cercanía a zonas verdes y áreas de preservación. Su extensión aproximada es de 0,8 km² y fue fundado en la década de 1970, desarrollándose principalmente como un sector de vivienda popular. El barrio cuenta con servicios básicos, escuelas y pequeñas áreas comerciales, manteniendo un ambiente comunitario típico de Ciudad Bolívar.
+                    Se destaca por su participación en proyectos ambientales, como la creación de un bosque urbano, en colaboración con grupos socioambientales y la comunidad. 
+                    Cuenta con un Centro de Desarrollo Comunitario (CDC) que ofrece cursos gratuitos para diferentes grupos de edad, con énfasis en formación para el emprendimiento y la empleabilidad. 
                 </p>
             </div>
         </div>
