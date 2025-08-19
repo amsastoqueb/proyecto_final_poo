@@ -214,3 +214,35 @@ footer {
 
 /* Contenedor opcional para separar el título de su sección */
 .page-title{ margin: .25rem 0 1rem; }
+
+/* ===== Bloque de descripción bajo el título ===== */
+.page-desc{
+  background:#ffffff;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  box-shadow:0 10px 28px rgba(15,23,42,.06);
+  padding:12px 16px;
+  line-height:1.6;
+  /* centrado y ancho cómodo */
+  max-width: 1000px;
+  margin: 8px auto 16px;
+}
+.page-desc p{ margin:0; }
+
+/* Quitar el contorno negro al hacer click en polígonos/puntos */
+.leaflet-container .leaflet-interactive:focus,
+.leaflet-container .leaflet-interactive:active {
+  outline: none !important;
+}
+
+/* También para el botón de cerrar del popup y enlaces de Leaflet */
+.leaflet-container a:focus,
+.leaflet-container .leaflet-popup-close-button:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Evita el highlight azul/negro en móviles WebKit */
+.leaflet-container .leaflet-interactive {
+  -webkit-tap-highlight-color: transparent;
+}
