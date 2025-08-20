@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Catastro 3D – Arborizadora Alta</title>
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <style>
+    html, body, #cesiumContainer { width:100%; height:100%; margin:0; padding:0; overflow:hidden; }
+    
+    /* Estilos para la leyenda */
+    .legend {
+      position:absolute;
+      bottom:10px;
+      right:10px;
+      background:rgba(0, 0, 0, 0.8);
+      color:white;
+      padding:15px;
+      border-radius:10px;
+      font-family:sans-serif;
+      z-index: 10;
+      width:280px;
+    }
+    .legend h3 {
+      margin-top: 0;
+      color: #006400;
+    }
+    .legend div {
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    .description-box {
+      background: #f0f8ff;
+      border: 2px solid #006400;
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 10px;
+      font-size: 12px;
+      color: #333;
+    }
+    .description-box p {
+      margin: 0 0 8px 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="cesiumContainer"></div>
+  
+  <!-- Leyenda -->
+  <div class="legend">
+    <h3>Convenciones de la página</h3>
+    <div class="description-box">
+      <p><strong>¿Qué son las construcciones y los predios?</strong></p>
+      <p><strong>Predios:</strong> Son los límites legales de la propiedad. Se muestran con líneas azules.</p>
+      <p><strong>Construcciones:</strong> Son los edificios dentro de los predios. La altura de cada construcción se calcula multiplicando el número de pisos por 3 metros. Las construcciones se representan con diferentes texturas.</p>
+      <p><strong>¿Cómo ver más detalles?</strong> Haz clic sobre una construcción para ver su número de pisos y la altura en metros.</p>
+    </div>
+  </div>
+
+  <script>
+    // 1) Configuración de Cesium
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4NTIyNDlhYy03OGZhLTRkNTctYjhhOC01NGFlYTRmZGFhNTQiLCJpZCI6MzMxMzcwLCJpYXQiOjE3NTUwNDI1OTF9.01glnnDUpehAFVaOO5v6Vfk5XnvjyEPt6wgYd7jP_9c';
+
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+      terrain: null,
+      timeline: false,
+      animation: false,
+      geocoder: false,
+      baseLayerPicker: false,
+      imageryProviderViewModels: [],
+      sceneModePicker: false,
+      navigationHelpButton: false,
+      fullscreenButton: false,
+      homeButton: false,
+      vrButton: false,
+      selectionIndicator: false,
+    });
+
+    // Centrar cámara en Arborizadora Alta
+    viewer.camera.setView({
+      destination: Cesium.Cartesian3.fromDegrees(-74.16566125684365, 4.566368155732512, 2500)
+    });
+
+    // Lista de texturas disponibles
+    const texturas = [
+      "img/ladrillo.jpg",
+      "img/concreto.jpg",
+      "img/vidrio.jpg"
+    ];
+
+    // 2) Cargar y extruir construcciones con texturas aleatorias
+    Cesium.GeoJsonDataSource.load('arbalta_construcciones_4326.geojson', {
+      clampToGround: false
+    }).then(function(ds) {
+      viewer.dataSources.add(ds);
+
+      const entities = ds.entities.values;
+      for (let i = 0; i < entities.length; i++) {
+        const e = entities[i];
+        if (!e.polygon) continue;
+
+        const pisosProp = e.properties && e.properties.CONNPISOS;
+        const pisos = pisosProp ? Number(pisosProp.getValue()) : 1;
+        const altura = Math.max(1, pisos) * 3;
+
+        e.polygon.extrudedHeight = altura;
+        e.polygon.height = 0;
+        e.polygon.outline = true;
+        e.polygon.outlineColor = Cesium.Color.BLACK;
+
+        // Escoger textura aleatoria
+        const textura = texturas[Math.floor(Math.random() * texturas.length)];
+
+        e.polygon.material = new Cesium.ImageMaterialProperty({
+          image: textura,
+          repeat: new Cesium.Cartesian2(1, pisos)
+        });
+
+        // Tooltip
+        e.description = `
+          <table>
+            <tr><th>Pisos</th><td>${pisos}</td></tr>
+            <tr><th>Altura (m)</th><td>${altura}</td></tr>
+          </table>`;
+      }
+
+      viewer.flyTo(ds);
+    }).catch(function(error) {
+      console.error("Error al cargar construcciones:", error);
+    });
+
+    // 3) Cargar predios
+    Cesium.GeoJsonDataSource.load('arbalta_predios_4326.geojson', {
+      clampToGround: false
+    }).then(function(dsPred) {
+      viewer.dataSources.add(dsPred);
+      const ents = dsPred.entities.values;
+      for (let i = 0; i < ents.length; i++) {
+        const e = ents[i];
+        if (e.polygon) {
+          e.polygon.material = Cesium.Color.TRANSPARENT;
+          e.polygon.outline = true;
+          e.polygon.outlineColor = Cesium.Color.fromCssColorString('#00a1ff').withAlpha(0.9);
+        }
+        if (e.polyline) {
+          e.polyline.material = Cesium.Color.fromCssColorString('#00a1ff').withAlpha(0.9);
+          e.polyline.width = 1.5;
+        }
+      }
+    }).catch(function(error) {
+      console.error("Error al cargar predios:", error);
+    });
+  </script>
+</body>
+</html>

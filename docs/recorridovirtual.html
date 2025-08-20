@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Recorrido Virtual - Tercera Persona (con colisiones)</title>
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
+  <style>
+    html, body, #cesiumContainer {
+      width: 100%;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #000;
+    }
+    .leyenda {
+      position: absolute;
+      bottom: 10px; left: 10px;
+      background: rgba(255,255,255,.9);
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 0.9em;
+      z-index: 10;
+      max-width: 380px;
+      line-height: 1.35;
+    }
+  </style>
+</head>
+<body>
+  <div id="cesiumContainer"></div>
+
+  <div class="leyenda">
+    <strong>Controles</strong>
+    <ul style="margin:6px 0 0 18px;padding:0;">
+      <li>Haz clic en el mapa: el muñeco <em>mira</em> el destino y <em>camina</em> hacia allá.</li>
+      <li>La cámara va detrás del muñeco (vista en tercera persona).</li>
+      <li>El muñeco ya no atraviesa construcciones (puede salir si apareció dentro de una).</li>
+      <li>Espacio: detener movimiento.</li>
+    </ul>
+  </div>
+
+  <script>
+    // ================== Configuración ==================
+    Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4NTIyNDlhYy03OGZhLTRkNTctYjhhOC01NGFlYTRmZGFhNTQiLCJpZCI6MzMxMzcwLCJpYXQiOjE3NTUwNDI1OTF9.01glnnDUpehAFVaOO5v6Vfk5XnvjyEPt6wgYd7jP_9c";
+
+    const viewer = new Cesium.Viewer("cesiumContainer", {
+      terrainProvider: undefined,
+      shouldAnimate: true,
+      infoBox: false,
+      selectionIndicator: false
+    });
+
+    viewer.scene.skyBox.show = false;
+    viewer.scene.skyAtmosphere.show = false;
+    viewer.scene.backgroundColor = Cesium.Color.BLACK;
+
+    // ================== Parámetros ==================
+    const AVATAR_HEIGHT = 1.7;
+    const SPEED = 10;
+    const STOP_THRESHOLD = 0.5;
+
+    const CAM_BACK = 7.5;
+    const CAM_UP = 3.0;
+    const CAM_PITCH_DEG = -15;
+    const MODEL_ROTATION = -Math.PI / 2;
+
+    // ================== Estado ==================
+    let personaje = null;
+    let modelReady = false;
+
+    let currentPosition = Cesium.Cartesian3.fromDegrees(-74.16566125684365, 4.566368155732512, AVATAR_HEIGHT);
+    let currentHeading = 0.0;
+    let destination = null;
+    let moving = false;
+
+    // ================== Utilidades ==================
+    function cartesianToLonLat(cart){
+      const c = Cesium.Cartographic.fromCartesian(cart);
+      return { lon: Cesium.Math.toDegrees(c.longitude), lat: Cesium.Math.toDegrees(c.latitude) };
+    }
+
+    function pointInPolygon(point, vs){
+      let x = point.lon, y = point.lat;
+      let inside = false;
+      for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+        let xi = vs[i].lon, yi = vs[i].lat;
+        let xj = vs[j].lon, yj = vs[j].lat;
+        let intersect = ((yi > y) !== (yj > y)) &&
+                        (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    }
+
+    function isInsideBuilding(pos, edificio){
+      const ll = cartesianToLonLat(pos);
+      const z = Cesium.Cartographic.fromCartesian(pos).height;
+      return pointInPolygon(ll, edificio.vertices) && z <= edificio.altura;
+    }
+
+    function normalizeVec(v){ return Cesium.Cartesian3.normalize(v, new Cesium.Cartesian3()); }
+    function magnitude(v){ return Cesium.Cartesian3.magnitude(v); }
+
+    function computeHeading(fromCartesian, toCartesian) {
+      const enu = Cesium.Transforms.eastNorthUpToFixedFrame(fromCartesian);
+      const invEnu = Cesium.Matrix4.inverse(enu, new Cesium.Matrix4());
+      const localTo = Cesium.Matrix4.multiplyByPoint(invEnu, toCartesian, new Cesium.Cartesian3());
+      return Math.atan2(localTo.x, localTo.y);
+    }
+
+    function setModelPose(position, headingRad) {
+      if (!personaje) return;
+      const adjustedHeading = headingRad + MODEL_ROTATION;
+      const hpr = new Cesium.HeadingPitchRoll(adjustedHeading, 0, 0);
+      personaje.modelMatrix = Cesium.Transforms.headingPitchRollToFixedFrame(position, hpr);
+    }
+
+    function updateThirdPersonCamera(pos, headingRad) {
+      const hpr = new Cesium.HeadingPitchRoll(headingRad, 0, 0);
+      const modelFrame = Cesium.Transforms.headingPitchRollToFixedFrame(pos, hpr);
+      const offsetLocal = new Cesium.Cartesian3(0.0, -CAM_BACK, CAM_UP);
+      const cameraPos = Cesium.Matrix4.multiplyByPoint(modelFrame, offsetLocal, new Cesium.Cartesian3());
+
+      viewer.camera.setView({
+        destination: cameraPos,
+        orientation: {
+          heading: headingRad,
+          pitch: Cesium.Math.toRadians(CAM_PITCH_DEG),
+          roll: 0.0
+        }
+      });
+    }
+
+    // ================== Cargar modelo ==================
+    Cesium.Model.fromGltfAsync({
+      url: "./CesiumMan.glb",
+      modelMatrix: Cesium.Transforms.headingPitchRollToFixedFrame(
+        currentPosition, new Cesium.HeadingPitchRoll(currentHeading + MODEL_ROTATION, 0, 0)
+      ),
+      scale: 1,
+      minimumPixelSize: 48,
+      maximumScale: 2000
+    }).then(model => {
+      personaje = model;
+      viewer.scene.primitives.add(model);
+      modelReady = true;
+
+      setModelPose(currentPosition, currentHeading);
+      updateThirdPersonCamera(currentPosition, currentHeading);
+    });
+
+    // ================== Edificios con colisión ==================
+    const edificios = [];
+    const texturas = ["img/ladrillo.jpg", "img/concreto.jpg", "img/vidrio.jpg"];
+
+    Cesium.GeoJsonDataSource.load("arbalta_construcciones_4326.geojson", { clampToGround: false })
+    .then(ds => {
+      viewer.dataSources.add(ds);
+      for(const e of ds.entities.values){
+        if(!e.polygon) continue;
+        const pisos = e.properties && e.properties.CONNPISOS ? Number(e.properties.CONNPISOS.getValue()) : 1;
+        const altura = Math.max(1,pisos)*3;
+        e.polygon.extrudedHeight = altura;
+
+        const textura = texturas[Math.floor(Math.random()*texturas.length)];
+        e.polygon.material = new Cesium.ImageMaterialProperty({
+          image: textura,
+          repeat: new Cesium.Cartesian2(1, Math.max(1,pisos))
+        });
+
+        // Guardar geometría para colisiones
+        const hierarchy = e.polygon.hierarchy.getValue(Cesium.JulianDate.now());
+        const verts = hierarchy.positions.map(p => cartesianToLonLat(p));
+        edificios.push({vertices: verts, altura: altura});
+      }
+    });
+
+    // ================== Click para mover ==================
+    viewer.screenSpaceEventHandler.setInputAction(function(click) {
+      if (!personaje) return;
+      let picked = viewer.scene.pickPosition(click.position);
+      if (!Cesium.defined(picked)) {
+        const ray = viewer.camera.getPickRay(click.position);
+        picked = viewer.scene.globe.pick(ray, viewer.scene);
+      }
+      if (!Cesium.defined(picked)) return;
+
+      const carto = Cesium.Ellipsoid.WGS84.cartesianToCartographic(picked);
+      destination = Cesium.Cartesian3.fromRadians(carto.longitude, carto.latitude, AVATAR_HEIGHT);
+
+      currentHeading = computeHeading(currentPosition, destination);
+      setModelPose(currentPosition, currentHeading);
+      updateThirdPersonCamera(currentPosition, currentHeading);
+
+      moving = true;
+
+      if (personaje && personaje.activeAnimations) {
+        try {
+          personaje.activeAnimations.removeAll();
+          personaje.activeAnimations.addAll({ loop: Cesium.ModelAnimationLoop.REPEAT, speedup: 1.0 });
+        } catch(e){}
+      }
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+    // ================== Movimiento ==================
+    viewer.clock.onTick.addEventListener(clock => {
+      if (!moving || !destination) return;
+      const delta = clock.deltaSeconds || 0.016;
+      const step = SPEED * delta;
+
+      const toTarget = Cesium.Cartesian3.subtract(destination, currentPosition, new Cesium.Cartesian3());
+      const dist = magnitude(toTarget);
+
+      if (dist <= STOP_THRESHOLD) {
+        currentPosition = destination;
+        moving = false;
+        destination = null;
+        if (personaje && personaje.activeAnimations) {
+          try { personaje.activeAnimations.removeAll(); } catch(e){}
+        }
+        setModelPose(currentPosition, currentHeading);
+        updateThirdPersonCamera(currentPosition, currentHeading);
+        return;
+      }
+
+      const moveDir = normalizeVec(toTarget);
+      const deltaMove = Cesium.Cartesian3.multiplyByScalar(moveDir, step, new Cesium.Cartesian3());
+      const nextPos = Cesium.Cartesian3.add(currentPosition, deltaMove, new Cesium.Cartesian3());
+
+      // Colisiones
+      let bloqueado = false;
+      for(const edif of edificios){
+        const insideNow = isInsideBuilding(currentPosition, edif);
+        const insideNext = isInsideBuilding(nextPos, edif);
+        if(!insideNow && insideNext){
+          bloqueado = true;
+          break;
+        }
+      }
+
+      if(!bloqueado){
+        currentPosition = nextPos;
+      }
+
+      currentHeading = computeHeading(currentPosition, Cesium.Cartesian3.add(currentPosition, moveDir, new Cesium.Cartesian3()));
+      setModelPose(currentPosition, currentHeading);
+      updateThirdPersonCamera(currentPosition, currentHeading);
+    });
+
+    // ================== Vista inicial ==================
+    viewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(-74.16566125684365, 4.566368155732512, 60),
+      orientation: { heading: 0, pitch: Cesium.Math.toRadians(-30), roll: 0 },
+      duration: 1.0
+    });
+
+    window.addEventListener("keydown", e => {
+      if (e.code === "Space") {
+        moving = false;
+        destination = null;
+        if (personaje && personaje.activeAnimations) {
+          try { personaje.activeAnimations.removeAll(); } catch(e){}
+        }
+      }
+    });
+  </script>
+</body>
+</html>
