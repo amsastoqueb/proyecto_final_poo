@@ -11,10 +11,7 @@
     <link rel="stylesheet" href="estilos.css">
 
     <style>
-
         /* Estilo del body y contenedor principal */
-        
-
         .container {
             display: flex;
             height: 100vh;
@@ -32,12 +29,13 @@
         }
 
         /* Colores base */
-:root {
-    --verde-principal: #a8d5ba;
-    --verde-oscuro: #6b8f71;
-    --blanco: #ffffff;
-    --gris: #f4f4f4;
-}
+        :root {
+            --verde-principal: #a8d5ba;
+            --verde-oscuro: #6b8f71;
+            --blanco: #ffffff;
+            --gris: #f4f4f4;
+        }
+
         /* Estilos básicos del menú desplegable */
         nav ul {
             list-style: none;
@@ -78,7 +76,7 @@
 </head>
 <body>
 
-        <!-- Encabezado con logo -->
+    <!-- Encabezado con logo -->
     <header>
         <div class="logo-container">
             <img src="img/logo.jpeg" alt="Logo Arborizadora Alta" width="80">
@@ -111,31 +109,30 @@
     </header>
 
     <div class="container" style="display: flex; gap: 20px; padding: 20px; height: 70vh;">
-    <!-- Lado izquierdo: visor Leaflet -->
-    <div id="map" style="flex: 1.4; height: 100%; border: 2px solid #2e7d32; border-radius: 8px;"></div>
+        <!-- Lado izquierdo: visor Leaflet -->
+        <div id="map" style="flex: 1.4; height: 100%; border: 2px solid #2e7d32; border-radius: 8px;"></div>
 
-    <!-- Lado derecho: descripción con recuadro verde -->
-    <div class="description" style="flex: 1; background-color: rgba(240, 252, 242, 0.1); /* verde pastel con 80% de opacidad */
-border: 2px solid rgba(46, 125, 50, 1); border-radius: 8px; padding: 20px; overflow-y: auto;">
-        <!-- Subtítulo VIAS -->
-        <center><h2 class="badge-title">VIAS</h2></center>
-        <h3>Descripción del mapa</h3>
-        <p>Este mapa interactivo muestra las principales vías del barrio Arborizadora Alta, ubicado en la localidad de Ciudad Bolívar, al sur de Bogotá. Arborizadora Alta es una zona caracterizada por su crecimiento urbano informal, donde muchas familias han construido sus viviendas de manera autónoma, contribuyendo al desarrollo de la comunidad.</p>
+        <!-- Lado derecho: descripción con recuadro verde -->
+        <div class="description" style="flex: 1; background-color: rgba(240, 252, 242, 0.1);
+        border: 2px solid rgba(46, 125, 50, 1); border-radius: 8px; padding: 20px; overflow-y: auto;">
+            <!-- Subtítulo VIAS -->
+            <center><h2 class="badge-title">VIAS</h2></center>
+            <h3>Descripción del mapa</h3>
+            <p>Este mapa interactivo muestra las principales vías del barrio Arborizadora Alta, ubicado en la localidad de Ciudad Bolívar, al sur de Bogotá. Arborizadora Alta es una zona caracterizada por su crecimiento urbano informal, donde muchas familias han construido sus viviendas de manera autónoma, contribuyendo al desarrollo de la comunidad.</p>
 
-        <p>Entre las vías más destacadas se encuentran:</p>
+            <p>Entre las vías más destacadas se encuentran:</p>
 
-        <p><strong>Vía Arborizadora Alta:</strong> Una de las arterias principales que conecta diversos sectores del barrio y facilita el acceso a otras zonas de la ciudad.</p>
-        <p><strong>Carrera 45:</strong> Una vía significativa que atraviesa el barrio, conectando con importantes puntos de la localidad.</p>
-        <p><strong>Calle 69 Sur:</strong> Una calle transversal que interseca varias vías principales, facilitando la movilidad dentro del barrio.</p>
-        <p><strong>Transversal 34:</strong> Una vía que conecta con otras áreas de Ciudad Bolívar, mejorando la conectividad del barrio.</p>
-        <p><strong>Calle 75 Sur:</strong> Una calle que bordea el barrio, proporcionando acceso a servicios y comercios locales.</p>
+            <p><strong>Vía Arborizadora Alta:</strong> Una de las arterias principales que conecta diversos sectores del barrio y facilita el acceso a otras zonas de la ciudad.</p>
+            <p><strong>Carrera 45:</strong> Una vía significativa que atraviesa el barrio, conectando con importantes puntos de la localidad.</p>
+            <p><strong>Calle 69 Sur:</strong> Una calle transversal que interseca varias vías principales, facilitando la movilidad dentro del barrio.</p>
+            <p><strong>Transversal 34:</strong> Una vía que conecta con otras áreas de Ciudad Bolívar, mejorando la conectividad del barrio.</p>
+            <p><strong>Calle 75 Sur:</strong> Una calle que bordea el barrio, proporcionando acceso a servicios y comercios locales.</p>
 
-        <p>Estas vías son esenciales para la movilidad de los residentes y el acceso a servicios y comercios locales. Además, el barrio cuenta con una red de transporte público que incluye rutas de autobús como 6-9, H605, H639 y T25, así como la estación de tranvía Juan Pablo II, facilitando la conexión con otras partes de la ciudad.</p>
+            <p>Estas vías son esenciales para la movilidad de los residentes y el acceso a servicios y comercios locales. Además, el barrio cuenta con una red de transporte público que incluye rutas de autobús como 6-9, H605, H639 y T25, así como la estación de tranvía Juan Pablo II, facilitando la conexión con otras partes de la ciudad.</p>
 
-        <p>Al pasar el cursor sobre cualquier vía en el mapa, podrá visualizar la latitud y longitud exactas de ese punto, facilitando la exploración geográfica precisa del barrio.</p>
+            <p>Al pasar el cursor sobre cualquier vía en el mapa, podrá visualizar la latitud y longitud exactas de ese punto, facilitando la exploración geográfica precisa del barrio.</p>
+        </div>
     </div>
-</div>
-
 
     <!-- Scripts de Leaflet -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -161,12 +158,18 @@ border: 2px solid rgba(46, 125, 50, 1); border-radius: 8px; padding: 20px; overf
                     // Evento cuando el mouse pasa sobre la feature
                     layer.on('mouseover', function (e) {
                         var latlng = e.latlng;
-                        var popup = L.popup({
+                        var etiqueta = (feature && feature.properties && feature.properties.MVIETIQUET != null)
+                            ? String(feature.properties.MVIETIQUET)
+                            : '';
+                        var content = `<strong>Latitud: ${latlng.lat.toFixed(6)}, Longitud: ${latlng.lng.toFixed(6)}` +
+                                       (etiqueta ? `<br>Dirección: ${etiqueta}` : '');
+
+                        L.popup({
                             closeButton: false,
                             offset: L.point(0, -10)
                         })
                         .setLatLng(latlng)
-                        .setContent(`Lat: ${latlng.lat.toFixed(6)}, Lng: ${latlng.lng.toFixed(6)}`)
+                        .setContent(content)
                         .openOn(map);
                     });
 
@@ -195,7 +198,7 @@ border: 2px solid rgba(46, 125, 50, 1); border-radius: 8px; padding: 20px; overf
             }).addTo(map);
         })
         .catch(error => console.error('Error cargando GeoJSON de contorno:', error));
-</script>
+    </script>
 
 </body>
 </html>
