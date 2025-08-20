@@ -5,6 +5,7 @@
   <title>Recorrido Virtual - Tercera Persona (con colisiones)</title>
   <script src="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Cesium.js"></script>
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
+  <link rel="stylesheet" href="estilos.css">
   <style>
     html, body, #cesiumContainer {
       width: 100%;
@@ -16,7 +17,7 @@
     }
     .leyenda {
       position: absolute;
-      bottom: 10px; left: 10px;
+      bottom: 30px; right: 5px;
       background: rgba(255,255,255,.9);
       padding: 10px 12px;
       border-radius: 10px;
@@ -38,12 +39,14 @@
       <li>El muñeco ya no atraviesa construcciones (puede salir si apareció dentro de una).</li>
       <li>Espacio: detener movimiento.</li>
     </ul>
+    <center><a href="index.html" class="activo"><h2 class="badge-title">Volver al inicio</h2></a></center>
   </div>
 
   <script>
     // ================== Configuración ==================
     Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4NTIyNDlhYy03OGZhLTRkNTctYjhhOC01NGFlYTRmZGFhNTQiLCJpZCI6MzMxMzcwLCJpYXQiOjE3NTUwNDI1OTF9.01glnnDUpehAFVaOO5v6Vfk5XnvjyEPt6wgYd7jP_9c";
-
+    
+    
     const viewer = new Cesium.Viewer("cesiumContainer", {
       terrainProvider: undefined,
       shouldAnimate: true,
